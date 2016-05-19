@@ -29,7 +29,7 @@ module AppPerfRubyAgent
     protected
 
     def handle_exception(env, exception)
-      notifications.instrument "ruby.error", :path => env["PATH_INFO"], :method => env["REQUEST_METHOD"], :message => exception.message, :backtrace => exception.backtrace
+      notifications.instrument "ruby.error", :path => env["PATH_INFO"], :method => env["REQUEST_METHOD"], :message => exception.message, :error_class => exception.class.to_s, :backtrace => exception.backtrace
       raise exception
     end
 
