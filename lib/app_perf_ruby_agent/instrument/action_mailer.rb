@@ -11,6 +11,7 @@ module AppPerfRubyAgent
       end
 
       def prepare(event)
+        event.payload[:backtrace] = clean_trace
         event.payload.except!(:mail)
       end
 

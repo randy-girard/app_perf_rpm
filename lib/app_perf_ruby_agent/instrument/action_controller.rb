@@ -15,6 +15,7 @@ module AppPerfRubyAgent
       end
 
       def prepare(event)
+        event.payload[:backtrace] = clean_trace
         event.payload[:end_point] = "#{event.payload.delete(:controller)}##{event.payload.delete(:action)}"
         event.payload.slice!(:path, :method, :params, :db_runtime, :view_runtime, :end_point)
       end

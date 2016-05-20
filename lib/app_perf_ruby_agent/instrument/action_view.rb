@@ -20,6 +20,7 @@ module AppPerfRubyAgent
             event.payload[key] = value
           end
         end
+        event.payload[:backtrace] = clean_trace
       end
 
     end

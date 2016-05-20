@@ -52,6 +52,10 @@ module AppPerfRubyAgent
       def after
       end
 
+      def clean_trace
+        Rails.backtrace_cleaner.clean(caller[2..-1])
+      end
+
       def instrument(*args)
         ActiveSupport::Notifications.instrument(*args)
       end
