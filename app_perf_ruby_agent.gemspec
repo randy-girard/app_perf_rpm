@@ -11,4 +11,10 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.homepage      = 'https://www.github.com/randy-girard/app_perf_ruby_agent'
   s.license       = 'MIT'
+
+  s.add_development_dependency "rake"
+  s.add_development_dependency "rspec"
+  s.add_development_dependency "simplecov"
+  s.add_development_dependency "activesupport"
+  s.add_development_dependency "rails"
 end
