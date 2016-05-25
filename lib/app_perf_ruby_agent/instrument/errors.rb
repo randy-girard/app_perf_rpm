@@ -3,7 +3,7 @@ module AppPerfRubyAgent
     class Errors < AppPerfRubyAgent::Instrument::Base
 
       def initialize
-        super /^ruby\.errors$/
+        super /^app\.errors$/
       end
 
       def active?

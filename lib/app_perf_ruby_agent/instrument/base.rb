@@ -13,47 +13,26 @@ module AppPerfRubyAgent
     #   end
     class Base
 
-      attr_reader :pattern
+      attr_reader :pattern, :collector
 
       # Create an instrument that will match notification names on the given
       # pattern.
       def initialize(pattern)
-        reset
         @pattern = pattern
+      end
+
+      def collector=(c)
+        @collector = c
       end
 
       def active?
         false
       end
 
-      def occurance_type
-        :seconds
-      end
-
-      def occurance_value
-        60.seconds
-      end
-
-      def ready?
-        if occurance_type.eql?(:seconds)
-          Time.now > @timer + occurance_value
-        else
-          false
-        end
-      end
-
-      def reset
-        @timer = Time.now
-      end
-
       def before
       end
 
       def after
-      end
-
-      def clean_trace
-        Rails.backtrace_cleaner.clean(caller[2..-1])
       end
 
       def instrument(*args)

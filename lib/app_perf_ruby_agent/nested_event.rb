@@ -21,6 +21,7 @@ module AppPerfRubyAgent
     def initialize(*args)
       super
       @action, @category = name.split('.')
+      @sample = true
     end
 
     def duration=(d)
@@ -33,6 +34,14 @@ module AppPerfRubyAgent
 
     def gc_duration
       @gc_duration ||= 0
+    end
+
+    def sample
+      @sample
+    end
+
+    def sample=(s)
+      @sample = s
     end
 
     def started_at

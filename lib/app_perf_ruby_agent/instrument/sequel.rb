@@ -1,9 +1,8 @@
 module AppPerfRubyAgent
   module Instrument
-    class ActiveRecord < AppPerfRubyAgent::Instrument::Base
-
+    class Sequel < AppPerfRubyAgent::Instrument::Base
       def initialize
-        super /\.active_record$/
+        super /\.sequel/
       end
 
       def active?

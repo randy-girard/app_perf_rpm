@@ -1,9 +1,8 @@
 module AppPerfRubyAgent
   module Instrument
-    class ActionController < AppPerfRubyAgent::Instrument::Base
-
+    class Sinatra < AppPerfRubyAgent::Instrument::Base
       def initialize
-        super /\.action_controller$/
+        super /\.sinatra$/
       end
 
       def active?
@@ -11,7 +10,7 @@ module AppPerfRubyAgent
       end
 
       def ignore?(event)
-        event.name != 'process_action.action_controller'
+        event.name != 'process_action.sinatra'
       end
 
       def prepare(event)

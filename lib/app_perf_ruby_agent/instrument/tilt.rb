@@ -1,13 +1,16 @@
 module AppPerfRubyAgent
   module Instrument
-    class ActionView < AppPerfRubyAgent::Instrument::Base
-
+    class Tilt < AppPerfRubyAgent::Instrument::Base
       def initialize
-        super /\.action_view$/
+        super /\.tilt/
       end
 
       def active?
         true
+      end
+
+      def ignore?(event)
+        event.name != 'render.tilt'
       end
 
       def prepare(event)
@@ -22,7 +25,6 @@ module AppPerfRubyAgent
         end
         event.payload[:backtrace] = AppPerfRubyAgent.clean_trace
       end
-
     end
   end
 end

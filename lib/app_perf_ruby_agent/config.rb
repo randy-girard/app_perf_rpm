@@ -1,6 +1,6 @@
 module AppPerfRubyAgent
   class Config
-    attr_accessor :store, :instruments, :monitors, :notification_exclude_patterns, :path_exclude_patterns, :options, :root, :host, :port, :ssl, :license_key, :sample_threshold
+    attr_accessor :store, :instruments, :probes, :notification_exclude_patterns, :path_exclude_patterns, :options, :root, :host, :port, :ssl, :license_key, :sample_threshold, :collector
 
     def initialize
 
@@ -19,17 +19,26 @@ module AppPerfRubyAgent
       self.store = AppPerfRubyAgent::Store.new
       self.notification_exclude_patterns = []
       self.path_exclude_patterns = []
+
       self.instruments = [
         AppPerfRubyAgent::Instrument::ActionController.new,
         AppPerfRubyAgent::Instrument::ActionView.new,
         AppPerfRubyAgent::Instrument::ActiveRecord.new,
         AppPerfRubyAgent::Instrument::Rack.new,
-        AppPerfRubyAgent::Instrument::RubyVm.new,
-        AppPerfRubyAgent::Instrument::Errors.new
+        AppPerfRubyAgent::Instrument::GarbageCollection.new,
+        AppPerfRubyAgent::Instrument::Errors.new,
+        AppPerfRubyAgent::Instrument::Sequel.new,
+        AppPerfRubyAgent::Instrument::Sinatra.new,
+        AppPerfRubyAgent::Instrument::Tilt.new,
+        AppPerfRubyAgent::Instrument::Memory.new
       ]
 
-      self.monitors = [
-        AppPerfRubyAgent::Monitor::Memory.new
+      self.probes = [
+        AppPerfRubyAgent::Probe::Memory.new,
+        AppPerfRubyAgent::Probe::GarbageCollection.new,
+        AppPerfRubyAgent::Probe::Sequel.new,
+        AppPerfRubyAgent::Probe::Sinatra.new,
+        AppPerfRubyAgent::Probe::Tilt.new
       ]
     end
 

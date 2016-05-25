@@ -5,6 +5,28 @@ module AppPerfRubyAgent
     @host ||= Socket.gethostname
   end
 
+  def self.probes
+    Rails.application.config.apm.probes.select(&:active?)
+  end
+
+  def self.round_time(t, sec = 1)
+    down = t - (t.to_i % sec)
+    up = down + sec
+
+    difference_down = t - down
+    difference_up = up - t
+
+    if (difference_down < difference_up)
+      return down.to_s
+    else
+      return up.to_s
+    end
+  end
+
+  def self.clean_trace
+    Rails.backtrace_cleaner.clean(caller[2..-1])
+  end
+
   def self.collection_on
     Thread.current[:system_metrics_collecting] = true
   end
@@ -34,19 +56,4 @@ require 'app_perf_ruby_agent/store'
 require 'app_perf_ruby_agent/config'
 require 'app_perf_ruby_agent/collector'
 require 'app_perf_ruby_agent/middleware'
-
-require 'app_perf_ruby_agent/instrument'
-require 'app_perf_ruby_agent/instrument/base'
-require 'app_perf_ruby_agent/instrument/action_controller'
-require 'app_perf_ruby_agent/instrument/action_mailer'
-require 'app_perf_ruby_agent/instrument/action_view'
-require 'app_perf_ruby_agent/instrument/active_record'
-require 'app_perf_ruby_agent/instrument/rack'
-require 'app_perf_ruby_agent/instrument/ruby_vm'
-require 'app_perf_ruby_agent/instrument/errors'
-
-require 'app_perf_ruby_agent/monitor'
-require 'app_perf_ruby_agent/monitor/base'
-require 'app_perf_ruby_agent/monitor/memory'
-
 require 'app_perf_ruby_agent/engine'

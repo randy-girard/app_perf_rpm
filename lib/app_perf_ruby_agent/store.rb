@@ -28,6 +28,15 @@ module AppPerfRubyAgent
       end
     end
 
+    def reset
+      @queue.clear
+      @start_time = Time.now
+    end
+
+    def ready?
+      Time.now > @start_time + 60.seconds && !@queue.empty?
+    end
+
     def worker_running?
       @worker_thread && @worker_thread.alive?
     end
@@ -35,25 +44,18 @@ module AppPerfRubyAgent
     def initialize_dispatcher
       @worker_thread = Thread.new do
         set_void_instrumenter
-        start_time = Time.now
+        reset
         loop do
           begin
-            monitors.each do |monitor|
-              if monitor.ready?
-                data = monitor.instrument
-                analytic_event_data << data if data
-                monitor.reset
-              end
-            end
+            AppPerfRubyAgent.probes.each(&:on_loop)
 
-            if Time.now > start_time + 60.seconds && !@queue.empty?
+            if ready?
               process_data
               dispatch_events(:analytic_event_data)
               dispatch_events(:transaction_sample_data)
               dispatch_events(:transaction_data)
               dispatch_events(:error_data)
-              @queue.clear
-              start_time = Time.now
+              reset
             end
           rescue => ex
             puts "ERROR: #{ex.inspect}"
@@ -66,10 +68,6 @@ module AppPerfRubyAgent
     end
 
     private
-
-    def monitors
-      Rails.application.config.apm.monitors.select(&:active?)
-    end
 
     def set_void_instrumenter
       Thread.current[:"instrumentation_#{notifier.object_id}"] = VoidInstrumenter.new(notifier)
@@ -91,6 +89,10 @@ module AppPerfRubyAgent
       Thread.current[:app_perf_error_data] ||= []
     end
 
+    def memory_data
+      Thread.current[:app_perf_memory_data] ||= []
+    end
+
     def notifier
       ActiveSupport::Notifications.notifier
     end
@@ -105,20 +107,22 @@ module AppPerfRubyAgent
         if (event = events.find {|e| e.payload[:end_point].present? })
           end_point = event.payload[:end_point]
         end
-        events.each {|e| e.payload[:end_point] = end_point }
+        if end_point.present?
+          events.each {|e| e.payload[:end_point] = end_point }
+        end
 
         root_event = AppPerfRubyAgent::NestedEvent.arrange(events.dup, :presort => false)
-        if root_event.duration > Rails.application.config.apm.sample_threshold
+        if root_event.sample && root_event.duration > Rails.application.config.apm.sample_threshold
           transaction_sample_data.push root_event
         end
 
-        events.select {|e| e.category.eql?("error") }.each do |error|
-          error_data << error
+        events.select {|e| e.category.eql?("error") }.each do |event|
+          error_data << event
         end
         all_events += events.dup
       end
 
-      all_events.group_by {|e| [e.payload[:end_point], round_time(e.started_at, 60)] }.each_pair do |group, grouped_events|
+      all_events.group_by {|e| [e.payload[:end_point], AppPerfRubyAgent.round_time(e.started_at, 60)] }.each_pair do |group, grouped_events|
         if group[0].present?
 
           calls = grouped_events.select {|e| event_name(e) == "Rack" }
@@ -144,26 +148,20 @@ module AppPerfRubyAgent
         end
       end
 
-      error_data.group_by {|e| round_time(e.started_at, 60) }.each_pair do |timestamp, errors|
+      error_data.group_by {|e| AppPerfRubyAgent.round_time(e.started_at, 60) }.each_pair do |timestamp, events|
         analytic_event_data << {
           :name => "Error",
           :timestamp => timestamp,
-          :value => errors.size
+          :value => events.size
         }
       end
-    end
 
-    def round_time(t, sec = 1)
-      down = t - (t.to_i % sec)
-      up = down + sec
-
-      difference_down = t - down
-      difference_up = up - t
-
-      if (difference_down < difference_up)
-        return down.to_s
-      else
-        return up.to_s
+      all_events.select {|e| e.category.eql?("memory") }.group_by {|e| AppPerfRubyAgent.round_time(e.started_at, 60) }.each_pair do |timestamp, events|
+        analytic_event_data << {
+          :name => "Memory",
+          :timestamp => timestamp,
+          :value => events.map(&:duration).sum
+        }
       end
     end
 
@@ -171,12 +169,12 @@ module AppPerfRubyAgent
       case event.category
       when "rack"
         "Rack"
-      when "action_controller"
-        "Ruby"
-      when "active_record"
+      when "action_controller", "action_view", "sinatra"
+        "App"
+      when "active_record", "sequel"
         "Database"
-      when "action_view"
-        "Ruby"
+      when "action_view", "tilt"
+        "View"
       when "gc"
         "GC Execution"
       when "memory"

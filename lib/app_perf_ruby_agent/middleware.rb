@@ -13,9 +13,9 @@ module AppPerfRubyAgent
         @collector.collect do
           begin
             response = notifications.instrument "request.rack", :path => env["PATH_INFO"], :method => env["REQUEST_METHOD"] do
-              instrumenters.each(&:before)
+              AppPerfRubyAgent.probes.each(&:on_start)
               response = @app.call(env)
-              instrumenters.each(&:after)
+              AppPerfRubyAgent.probes.each(&:on_finish)
               response
             end
           rescue Exception => e
@@ -29,7 +29,7 @@ module AppPerfRubyAgent
     protected
 
     def handle_exception(env, exception)
-      notifications.instrument "ruby.error", :path => env["PATH_INFO"], :method => env["REQUEST_METHOD"], :message => exception.message, :error_class => exception.class.to_s, :backtrace => exception.backtrace
+      notifications.instrument "app.error", :path => env["PATH_INFO"], :method => env["REQUEST_METHOD"], :message => exception.message, :error_class => exception.class.to_s, :backtrace => exception.backtrace
       raise exception
     end
 
@@ -39,10 +39,6 @@ module AppPerfRubyAgent
 
     def notifications
       ActiveSupport::Notifications
-    end
-
-    def instrumenters
-      Rails.application.config.apm.instruments.select(&:active?)
     end
   end
 end
