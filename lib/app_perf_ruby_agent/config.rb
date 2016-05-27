@@ -1,3 +1,5 @@
+require 'yaml'
+
 module AppPerfRubyAgent
   class Config
     attr_accessor :store, :instruments, :probes, :notification_exclude_patterns, :path_exclude_patterns, :options, :root, :host, :port, :ssl, :license_key, :sample_threshold, :collector
@@ -6,8 +8,8 @@ module AppPerfRubyAgent
 
     end
 
-    def load(app)
-      self.root = app.root.to_s
+    def load(root)
+      self.root = root.to_s
       yaml = YAML.load_file(root + "/app_perf_ruby_agent.yml")
 
       self.host = yaml["host"]

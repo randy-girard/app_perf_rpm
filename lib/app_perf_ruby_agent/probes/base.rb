@@ -19,7 +19,7 @@ module AppPerfRubyAgent
       end
 
       def collect
-        Rails.application.config.apm.collector.collect do
+        AppPerfRubyAgent.config.collector.collect do
           yield
         end
       end

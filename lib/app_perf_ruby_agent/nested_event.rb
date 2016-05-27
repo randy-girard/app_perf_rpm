@@ -77,7 +77,7 @@ module AppPerfRubyAgent
         :exclusive_duration => exclusive_duration,
         :end_point => payload[:end_point]
       }
-      h.merge!(:children => children) if children.present?
+      h.merge!(:children => children.map(&:to_hash)) if children.length > 0
       h
     end
   end

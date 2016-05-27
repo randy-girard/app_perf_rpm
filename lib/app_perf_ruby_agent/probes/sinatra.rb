@@ -7,15 +7,6 @@ module AppPerfRubyAgent
       end
 
       if defined?(::Sinatra)
-        class << ::Sinatra::Base
-          alias build_without_trace build
-
-          def build(*args, &block)
-            self.use AppPerfRubyAgent::Middleware, Rails.application.config.apm.collector, []
-            build_without_trace(*args, &block)
-          end
-        end
-
         ::Sinatra::Base.class_eval do
           alias dispatch_without_trace! dispatch!
           alias compile_template_without_trace compile_template
