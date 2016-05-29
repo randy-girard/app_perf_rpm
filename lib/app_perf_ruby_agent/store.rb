@@ -62,6 +62,7 @@ module AppPerfRubyAgent
           rescue => ex
             puts "ERROR: #{ex.inspect}"
             puts "#{ex.backtrace.inspect}"
+            STDOUT.flush
           end
           sleep 5
         end
@@ -124,34 +125,42 @@ module AppPerfRubyAgent
         all_events += events.dup
       end
 
-      all_events.group_by {|e| [e.payload[:end_point], AppPerfRubyAgent.round_time(e.started_at, 60)] }.each_pair do |group, grouped_events|
+      all_events.group_by {|e| [e.payload[:end_point], AppPerfRubyAgent.round_time(e.timestamp, 60)] }.each_pair do |group, grouped_events|
         if group[0]
 
-          calls = grouped_events.select {|e| event_name(e) == "Rack" }
+          middleware_calls = grouped_events.select {|e| event_name(e) == "Middleware" }
+          app_calls = grouped_events.select {|e| event_name(e) == "App" }
+          view_calls = grouped_events.select {|e| event_name(e) == "View" }
           db_calls = grouped_events.select {|e| event_name(e) == "Database" }
           gc_calls = grouped_events.select {|e| event_name(e) == "GC Execution" }
 
-          durations = calls.map(&:duration)
+          durations = grouped_events.map(&:exclusive_duration)
           total_duration = durations.inject(0){|sum,x| sum + x }
 
           transaction_data << {
             :end_point => group[0],
             :timestamp => group[1],
-            :call_count => calls.size,
+            :call_count => durations.size,
             :duration => total_duration,
             :avg => total_duration / durations.size.to_f,
             :min => durations.min,
             :max => durations.max,
             :sum_sqr => durations.inject {|sum, item| sum + item*item },
+            :app_call_count => app_calls.size,
+            :app_duration => app_calls.map(&:exclusive_duration).inject(0){|sum,x| sum + x },
+            :view_call_count => view_calls.size,
+            :view_duration => view_calls.map(&:exclusive_duration).inject(0){|sum,x| sum + x },
+            :middleware_call_count => middleware_calls.size,
+            :middleware_duration => middleware_calls.map(&:exclusive_duration).inject(0){|sum,x| sum + x },
             :db_call_count => db_calls.size,
-            :db_duration => db_calls.map(&:duration).inject(0){|sum,x| sum + x },
+            :db_duration => db_calls.map(&:exclusive_duration).inject(0){|sum,x| sum + x },
             :gc_call_count => gc_calls.size,
-            :gc_duration => gc_calls.map(&:duration).inject(0){|sum,x| sum + x }
+            :gc_duration => gc_calls.map(&:exclusive_duration).inject(0){|sum,x| sum + x }
           }
         end
       end
 
-      error_data.group_by {|e| AppPerfRubyAgent.round_time(e[:started_at], 60) }.each_pair do |timestamp, events|
+      error_data.group_by {|e| AppPerfRubyAgent.round_time(e[:timestamp], 60) }.each_pair do |timestamp, events|
         analytic_event_data << {
           :name => "Error",
           :timestamp => timestamp,
@@ -159,7 +168,7 @@ module AppPerfRubyAgent
         }
       end
 
-      all_events.select {|e| e.category.eql?("memory") }.group_by {|e| AppPerfRubyAgent.round_time(e.started_at, 60) }.each_pair do |timestamp, events|
+      all_events.select {|e| e.category.eql?("memory") }.group_by {|e| AppPerfRubyAgent.round_time(e.timestamp, 60) }.each_pair do |timestamp, events|
         analytic_event_data << {
           :name => "Memory",
           :timestamp => timestamp,
@@ -171,8 +180,8 @@ module AppPerfRubyAgent
     def event_name(event)
       case event.category
       when "rack"
-        "Rack"
-      when "action_controller", "action_view", "sinatra"
+        "Middleware"
+      when "action_controller", "sinatra"
         "App"
       when "active_record", "sequel"
         "Database"

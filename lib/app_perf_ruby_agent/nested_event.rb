@@ -44,7 +44,7 @@ module AppPerfRubyAgent
       @sample = s
     end
 
-    def started_at
+    def timestamp
       self.time
     end
 
@@ -57,7 +57,7 @@ module AppPerfRubyAgent
     end
 
     def parent_of?(event)
-      start = (started_at - event.started_at) * 1000.0
+      start = (timestamp - event.timestamp) * 1000.0
       start <= 0 && (start + duration >= event.duration)
     end
 
@@ -70,7 +70,7 @@ module AppPerfRubyAgent
         :name => name,
         :action => action,
         :category => category,
-        :started_at => started_at,
+        :timestamp => timestamp,
         :transaction_id => transaction_id,
         :payload => payload,
         :duration => duration,
