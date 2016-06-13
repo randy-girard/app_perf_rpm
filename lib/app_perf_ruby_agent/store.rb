@@ -36,7 +36,7 @@ module AppPerfRubyAgent
     end
 
     def ready?
-      Time.now > @start_time + 60 && !@queue.empty?
+      Time.now > @start_time + 60
     end
 
     def worker_running?
