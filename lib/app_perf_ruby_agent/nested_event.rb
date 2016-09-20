@@ -1,4 +1,5 @@
 require 'active_support/notifications'
+require 'digest'
 
 module AppPerfRubyAgent
   class NestedEvent < ActiveSupport::Notifications::Event
@@ -65,6 +66,19 @@ module AppPerfRubyAgent
       event.parent_of?(self)
     end
 
+    def trace_id
+      if payload[:trace_id]
+        raise self.inspect
+        Digest::SHA2.hexdigest(payload[:trace_id])
+      else
+        nil
+      end
+    end
+
+    def end_point
+      payload[:end_point]
+    end
+
     def to_hash
       h = {
         :name => name,
@@ -75,7 +89,8 @@ module AppPerfRubyAgent
         :payload => payload,
         :duration => duration,
         :exclusive_duration => exclusive_duration,
-        :end_point => payload[:end_point]
+        :end_point => end_point,
+        :trace_id => trace_id,
       }
       h.merge!(:children => children.map(&:to_hash)) if children.length > 0
       h

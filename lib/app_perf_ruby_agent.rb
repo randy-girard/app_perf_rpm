@@ -21,6 +21,10 @@ module AppPerfRubyAgent
     config.probes.select(&:active?)
   end
 
+  def self.web_server_probes
+    config.web_server_probes.select(&:active?)
+  end
+
   def self.config
     @config ||= AppPerfRubyAgent::Config.new
   end

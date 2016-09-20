@@ -2,7 +2,7 @@ require 'yaml'
 
 module AppPerfRubyAgent
   class Config
-    attr_accessor :store, :instruments, :probes, :notification_exclude_patterns, :path_exclude_patterns, :options, :root, :host, :port, :ssl, :license_key, :sample_threshold, :collector
+    attr_accessor :store, :instruments, :probes, :web_server_probes, :notification_exclude_patterns, :path_exclude_patterns, :options, :root, :host, :port, :ssl, :interval, :license_key, :sample_threshold, :collector
 
     def initialize
 
@@ -17,6 +17,7 @@ module AppPerfRubyAgent
       self.ssl = yaml["ssl"]
       self.license_key = yaml["license_key"]
       self.sample_threshold = yaml["sample_threshold"] || 2000
+      self.interval = 10
 
       self.store = AppPerfRubyAgent::Store.new
       self.notification_exclude_patterns = []
@@ -32,7 +33,8 @@ module AppPerfRubyAgent
         AppPerfRubyAgent::Instrument::Sequel.new,
         AppPerfRubyAgent::Instrument::Sinatra.new,
         AppPerfRubyAgent::Instrument::Tilt.new,
-        AppPerfRubyAgent::Instrument::Memory.new
+        AppPerfRubyAgent::Instrument::Memory.new,
+        AppPerfRubyAgent::Instrument::Nginx.new
       ]
 
       self.probes = [
@@ -41,6 +43,10 @@ module AppPerfRubyAgent
         AppPerfRubyAgent::Probe::Sequel.new,
         AppPerfRubyAgent::Probe::Sinatra.new,
         AppPerfRubyAgent::Probe::Tilt.new
+      ]
+
+      self.web_server_probes = [
+        AppPerfRubyAgent::Probe::Nginx.new
       ]
     end
 

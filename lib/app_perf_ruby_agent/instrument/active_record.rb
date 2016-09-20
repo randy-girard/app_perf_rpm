@@ -15,6 +15,7 @@ module AppPerfRubyAgent
       end
 
       def prepare(event)
+        event.payload[:adapter] = ::ActiveRecord::Base.connection.adapter_name
         event.payload[:sql] = event.payload[:sql].squeeze(" ")
         event.payload[:backtrace] = AppPerfRubyAgent.clean_trace
         event.payload.delete(:connection_id)

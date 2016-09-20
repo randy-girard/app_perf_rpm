@@ -36,7 +36,7 @@ module AppPerfRubyAgent
         @timer = Time.now
       end
 
-      def instrument
+      def instrument(options = {})
       end
     end
   end

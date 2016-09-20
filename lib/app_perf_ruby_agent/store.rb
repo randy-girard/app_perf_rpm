@@ -36,7 +36,7 @@ module AppPerfRubyAgent
     end
 
     def ready?
-      Time.now > @start_time + 60
+      Time.now > @start_time + AppPerfRubyAgent.config.interval
     end
 
     def worker_running?
@@ -100,19 +100,25 @@ module AppPerfRubyAgent
       ActiveSupport::Notifications.notifier
     end
 
+    def propagate_data(events, attribute)
+      event = nil
+      value = nil
+      if (event = events.find {|e| e.payload[attribute] })
+        value = event.payload[attribute]
+      end
+      if value
+        events.each {|e| e.payload[attribute] = value }
+      end
+      events
+    end
+
     def process_data
       all_events = []
 
       while @queue.size > 0
         events = @queue.pop
-
-        end_point = nil
-        if (event = events.find {|e| e.payload[:end_point] })
-          end_point = event.payload[:end_point]
-        end
-        if end_point
-          events.each {|e| e.payload[:end_point] = end_point }
-        end
+        events = propagate_data(events, :end_point)
+        events = propagate_data(events, :trace_id)
 
         root_event = AppPerfRubyAgent::NestedEvent.arrange(events.dup, :presort => false)
         if root_event.sample && root_event.duration > AppPerfRubyAgent.config.sample_threshold
@@ -179,6 +185,8 @@ module AppPerfRubyAgent
 
     def event_name(event)
       case event.category
+      when "nginx"
+        "Web Server"
       when "rack"
         "Middleware"
       when "action_controller", "sinatra"

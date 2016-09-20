@@ -12,11 +12,8 @@ module AppPerfRubyAgent
       else
         @collector.collect do
           begin
-            response = notifications.instrument "request.rack", :path => env["PATH_INFO"], :method => env["REQUEST_METHOD"] do
-              AppPerfRubyAgent.probes.each(&:on_start)
-              response = @app.call(env)
-              AppPerfRubyAgent.probes.each(&:on_finish)
-              response
+            response = instrument(env) do
+              @app.call(env)
             end
           rescue Exception => e
             handle_exception(env, e)
@@ -27,6 +24,16 @@ module AppPerfRubyAgent
     end
 
     protected
+
+    def instrument(env)
+      AppPerfRubyAgent.web_server_probes.each {|p| p.instrument(:env => env) }
+      notifications.instrument "request.rack", :path => env["PATH_INFO"], :method => env["REQUEST_METHOD"], :trace_id => env["HTTP_X_TRACE_ID"], :trace_start => env["HTTP_X_TRACE_START"] do
+        AppPerfRubyAgent.probes.each(&:on_start)
+        result = yield
+        AppPerfRubyAgent.probes.each(&:on_start)
+        result
+      end
+    end
 
     def handle_exception(env, exception)
       notifications.instrument "app.error", :path => env["PATH_INFO"], :method => env["REQUEST_METHOD"], :message => exception.message, :error_class => exception.class.to_s, :backtrace => exception.backtrace
