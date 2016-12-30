@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe AppPerfRubyAgent do
+describe AppPerfRpm do
 
-  subject { AppPerfRubyAgent }
+  subject { AppPerfRpm }
 
   describe "#host" do
     it "returns the host name" do
