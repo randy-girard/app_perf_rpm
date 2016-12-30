@@ -4,8 +4,7 @@ Bundler.setup
 require 'simplecov'
 SimpleCov.start
 
-require 'rails'
-require 'app_perf_ruby_agent'
+require 'app_perf_rpm'
 
 RSpec.configure do |config|
 

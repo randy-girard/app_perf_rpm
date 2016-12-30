@@ -21,10 +21,15 @@ module AppPerfRpm
     def load
       AppPerfRpm::Instrumentation.load
       @worker = ::AppPerfRpm::Worker.new
+
       if @worker.start
         @worker_running = true
         AppPerfRpm.tracing_on
       end
+    end
+
+    def mutex
+      @worker.mutex
     end
 
     def store(event)
@@ -44,14 +49,14 @@ module AppPerfRpm
         AppPerfRpm.logger.debug "Not turning tracing on due to without tracing mode."
         return
       end
-      @worker.mutex.synchronize do
+      mutex.synchronize do
         AppPerfRpm.logger.debug "Enabling tracing."
         @tracing = true
       end
     end
 
     def tracing_off
-      @worker.mutex.synchronize do
+      mutex.synchronize do
         AppPerfRpm.logger.debug "Disabling tracing."
         @tracing = false
       end
@@ -90,9 +95,29 @@ module AppPerfRpm
       end
     end
 
+    def host
+      @host ||= Socket.gethostname
+    end
+
+    def round_time(t, sec = 1)
+      t = Time.parse(t.to_s)
+
+      down = t - (t.to_i % sec)
+      up = down + sec
+
+      difference_down = t - down
+      difference_up = up - t
+
+      if (difference_down < difference_up)
+        return down.to_s
+      else
+        return up.to_s
+      end
+    end
+
     def mark_as_app(backtrace)
       backtrace.map {|bt|
-        bt.to_s.starts_with?("#{app_root}/") ?
+        bt.to_s[/^#{app_root}\//] ?
           "*#{bt}" :
           bt
       }

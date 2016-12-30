@@ -21,8 +21,30 @@ describe AppPerfRpm do
   end
 
   describe "#clean_trace" do
-    it "returns cleaned trace" do
-      expect(subject).to receive(:caller) {
+    it "returns cleaned trace with app marked" do
+      dir = File.dirname(__FILE__)
+      expect(Kernel).to receive(:caller) {
+        [
+          "#{dir}/example.rb:236:in `instance_exec'",
+          "#{dir}/example.rb:236:in `block in run'",
+          "#{dir}/example.rb:478:in `block in with_around_and_singleton_context_hooks'",
+          "#{dir}/example.rb:435:in `block in with_around_example_hooks'",
+          "#{dir}/hooks.rb:478:in `block in run'",
+          "#{dir}/hooks.rb:616:in `run_around_example_hooks_for'"
+        ]
+      }
+      expect(subject.clean_trace).to eq([
+        "*#{dir}/example.rb:236:in `instance_exec'",
+        "*#{dir}/example.rb:236:in `block in run'",
+        "*#{dir}/example.rb:478:in `block in with_around_and_singleton_context_hooks'",
+        "*#{dir}/example.rb:435:in `block in with_around_example_hooks'",
+        "*#{dir}/hooks.rb:478:in `block in run'",
+        "*#{dir}/hooks.rb:616:in `run_around_example_hooks_for'"])
+    end
+
+    it "returns cleaned trace without app marked" do
+      dir = File.dirname(__FILE__)
+      expect(Kernel).to receive(:caller) {
         [
           "example.rb:236:in `instance_exec'",
           "example.rb:236:in `block in run'",
@@ -32,30 +54,43 @@ describe AppPerfRpm do
           "hooks.rb:616:in `run_around_example_hooks_for'"
         ]
       }
-      expect(subject.clean_trace).to eq([])
+      expect(subject.clean_trace).to eq([
+        "example.rb:236:in `instance_exec'",
+        "example.rb:236:in `block in run'",
+        "example.rb:478:in `block in with_around_and_singleton_context_hooks'",
+        "example.rb:435:in `block in with_around_example_hooks'",
+        "hooks.rb:478:in `block in run'",
+        "hooks.rb:616:in `run_around_example_hooks_for'"])
     end
   end
 
-  describe "#collection_on" do
-    it "should turn collecting on" do
-      Thread.current[:app_perf_collecting] = false
-      subject.collection_on
-      expect(Thread.current[:app_perf_collecting]).to eq(true)
+  describe "#tracing on" do
+    it "should turn tracing on" do
+      expect(::AppPerfRpm).to receive(:mutex) { Mutex.new }.twice
+
+      ::AppPerfRpm.tracing_off
+
+      subject.tracing_on
+      expect(subject.tracing?).to eq(true)
     end
   end
 
   describe "#collection_off" do
     it "should turn collecting off" do
-      Thread.current[:app_perf_collecting] = true
-      subject.collection_off
-      expect(Thread.current[:app_perf_collecting]).to eq(false)
+      expect(::AppPerfRpm).to receive(:mutex) { Mutex.new }.twice
+      ::AppPerfRpm.tracing_on
+
+      subject.tracing_off
+      expect(subject.tracing?).to eq(false)
     end
   end
 
   describe "#collecting?" do
     it "should be collecting" do
-      Thread.current[:app_perf_collecting] = true
-      expect(subject.collecting?).to eq(true)
+      expect(::AppPerfRpm).to receive(:mutex) { Mutex.new }.once
+
+      ::AppPerfRpm.tracing_on
+      expect(subject.tracing?).to eq(true)
     end
   end
 
