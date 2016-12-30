@@ -40,7 +40,7 @@ module AppPerfRpm
     end
 
     def ready?
-      Time.now > @start_time + 10
+      Time.now > @start_time + 60
     end
 
     def worker_running?
