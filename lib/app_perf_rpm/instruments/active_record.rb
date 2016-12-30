@@ -1,9 +1,19 @@
+module AppPerfRpm
+  module Instruments
+    module ActiveRecord
+      module Adapters
+      end
+    end
+  end
+end
+
 if defined?(::ActiveRecord)
   AppPerfRpm.logger.info "Initializing activerecord tracer."
 
   if defined?(::ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
+    require 'app_perf_rpm/instruments/active_record/adapters/postgresql'
     ::ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.send(:include,
-      AppPerfRpm::Instruments::ActiveRecord::Adapters::Postgresql
+      ::AppPerfRpm::Instruments::ActiveRecord::Adapters::Postgresql
     )
 
     ::ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
@@ -16,8 +26,9 @@ if defined?(::ActiveRecord)
   end
 
   if defined?(::ActiveRecord::ConnectionAdapters::Mysql2Adapter)
+    require 'app_perf_rpm/instruments/active_record/adapters/mysql2'
     ::ActiveRecord::ConnectionAdapters::Mysql2Adapter.send(:include,
-      AppPerfRpm::Instruments::ActiveRecord::Adapters::Mysql2
+      ::AppPerfRpm::Instruments::ActiveRecord::Adapters::Mysql2
     )
 
     ::ActiveRecord::ConnectionAdapters::Mysql2Adapter.class_eval do
