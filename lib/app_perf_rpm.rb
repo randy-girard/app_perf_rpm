@@ -3,6 +3,7 @@ module AppPerfRpm
   require 'app_perf_rpm/configuration'
   require 'app_perf_rpm/worker'
   require 'app_perf_rpm/tracer'
+  require 'app_perf_rpm/utils'
   require 'app_perf_rpm/middleware'
   require 'app_perf_rpm/instrumentation'
   require 'app_perf_rpm/rails'

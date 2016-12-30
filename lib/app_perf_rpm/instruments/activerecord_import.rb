@@ -1,6 +1,8 @@
 module AppPerfRpm
   module Instruments
     module ActiveRecordImport
+      include AppPerfRpm::Utils
+
       def insert_many_with_trace( sql, values, *args )
         sql_copy = sql.dup
         base_sql, post_sql = if sql_copy.dup.is_a?( String )

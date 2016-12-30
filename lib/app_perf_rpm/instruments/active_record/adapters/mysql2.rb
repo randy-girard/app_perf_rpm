@@ -3,16 +3,12 @@ module AppPerfRpm
     module ActiveRecord
       module Adapters
         module Mysql2
+          include AppPerfRpm::Utils
 
           def ignore_trace?(name)
             %w(SCHEMA EXPLAIN CACHE).include?(name.to_s) ||
               (name && name.to_sym == :skip_logging) ||
               name == 'ActiveRecord::SchemaMigration Load'
-          end
-
-          def sanitize_sql(sql)
-            regexp = Regexp.new('(\'[\s\S][^\']*\'|\d*\.\d+|\d+|NULL)', Regexp::IGNORECASE)
-            sql.gsub(regexp, '?')
           end
 
           def execute_with_trace(sql, name = nil)

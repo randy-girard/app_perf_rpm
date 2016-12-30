@@ -8,6 +8,7 @@ module AppPerfRpm
                   :ssl,
                   :sample_rate,
                   :sample_threshold,
+                  :dispatch_interval,
                   :application_name
 
     def initialize
@@ -18,6 +19,7 @@ module AppPerfRpm
       self.application_name = "Default"
       self.sample_rate = 10 # Percentage of request to sample
       self.sample_threshold = 0 # Minimum amount of duration to sample
+      self.dispatch_interval = 60 # In seconds
     end
 
     private

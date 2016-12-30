@@ -40,7 +40,7 @@ module AppPerfRpm
     end
 
     def ready?
-      Time.now > @start_time + 60
+      Time.now > @start_time + ::AppPerfRpm.configuration.dispatch_interval
     end
 
     def worker_running?
