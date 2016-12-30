@@ -16,7 +16,7 @@ module AppPerfRpm
       self.ssl = false
       self.license_key = default_if_blank(ENV["APP_PERF_LICENSE_KEY"], nil)
       self.application_name = "Default"
-      self.sample_rate = 100 # Percentage of request to sample
+      self.sample_rate = 10 # Percentage of request to sample
       self.sample_threshold = 0 # Minimum amount of duration to sample
     end
 
