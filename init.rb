@@ -1,1 +1,1 @@
-require './lib/app_perf_ruby_agent'
+require './lib/app_perf_rpm'
