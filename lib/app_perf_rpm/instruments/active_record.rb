@@ -10,6 +10,20 @@ end
 if defined?(::ActiveRecord)
   AppPerfRpm.logger.info "Initializing activerecord tracer."
 
+  if defined?(::ActiveRecord::ConnectionAdapters::SQLite3Adapter)
+    require 'app_perf_rpm/instruments/active_record/adapters/sqlite3'
+    ::ActiveRecord::ConnectionAdapters::SQLite3Adapter.send(:include,
+      ::AppPerfRpm::Instruments::ActiveRecord::Adapters::Sqlite3
+    )
+    ::ActiveRecord::ConnectionAdapters::SQLite3Adapter.class_eval do
+      alias_method :exec_query_without_trace, :exec_query
+      alias_method :exec_query, :exec_query_with_trace
+
+      alias_method :exec_delete_without_trace, :exec_delete
+      alias_method :exec_delete, :exec_delete_with_trace
+    end
+  end
+
   if defined?(::ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
     require 'app_perf_rpm/instruments/active_record/adapters/postgresql'
     ::ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.send(:include,
