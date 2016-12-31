@@ -51,8 +51,8 @@ module AppPerfRpm
       end
 
       def trace?(duration = 0)
-        rand * 100 < ::AppPerfRpm.configuration.sample_rate &&
-        duration >= ::AppPerfRpm.configuration.sample_threshold
+        rand * 100 < ::AppPerfRpm.configuration.sample_rate.to_i &&
+        duration >= ::AppPerfRpm.configuration.sample_threshold.to_i
       end
 
       class Instance
