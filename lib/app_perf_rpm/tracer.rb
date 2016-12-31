@@ -9,6 +9,14 @@ module AppPerfRpm
         Thread.current[:trace_id] = t
       end
 
+      def tracing?
+        Thread.current[:tracing]
+      end
+
+      def tracing=(t)
+        Thread.current[:tracing] = t
+      end
+
       def start_instance(layer, opts = {})
         Instance.new(layer, opts)
       end
@@ -17,29 +25,41 @@ module AppPerfRpm
         !Thread.current[:trace_id].nil?
       end
 
-      def start_trace(layer, opts = {})
-        self.trace_id ||= opts.delete(:trace_id) || generate_trace_id
+      def trace?(duration = 0)
+        rand * 100 < ::AppPerfRpm.worker.configuration.sample_rate.to_i
+      end
 
-        if trace?
+      def start_trace(layer, opts = {})
+        self.tracing = ::AppPerfRpm::Tracer.trace?
+
+        if tracing?
+          self.trace_id ||= opts.delete(:trace_id) || generate_trace_id
           result = trace(layer, opts) do
             yield
           end
+          self.trace_id = nil
         else
-          yield
+          result = yield
         end
-
-        self.trace_id = nil
 
         result
       end
 
       def trace(layer, opts = {})
-        start = Time.now.to_f
-        result = yield
-        duration = (Time.now.to_f - start) * 1000
+        self.tracing = ::AppPerfRpm::Tracer.trace? if tracing?.nil?
 
-        event = [layer, trace_id, start, duration, YAML::dump(opts)]
-        ::AppPerfRpm.store(event)
+        result = nil
+
+        if tracing?
+          start = Time.now.to_f
+          result = yield
+          duration = (Time.now.to_f - start) * 1000
+
+          event = [layer, trace_id, start, duration, YAML::dump(opts)]
+          ::AppPerfRpm.store(event)
+        else
+          result = yield
+        end
 
         result
       end
@@ -50,11 +70,6 @@ module AppPerfRpm
 
       def generate_trace_id
         Digest::SHA1.hexdigest([Time.now, rand].join)
-      end
-
-      def trace?(duration = 0)
-        rand * 100 < ::AppPerfRpm.configuration.sample_rate.to_i &&
-        duration >= ::AppPerfRpm.configuration.sample_threshold.to_i
       end
 
       class Instance
@@ -72,9 +87,11 @@ module AppPerfRpm
         end
 
         def submit(opts = {})
-          self.opts.merge!(opts)
-          event = [layer, trace_id, start, duration, opts.to_json]
-          ::AppPerfRpm.store(event)
+          if ::AppPerfRpm::Tracer.tracing?
+            self.opts.merge!(opts)
+            event = [layer, trace_id, start, duration, opts.to_json]
+            ::AppPerfRpm.store(event)
+          end
         end
 
         private

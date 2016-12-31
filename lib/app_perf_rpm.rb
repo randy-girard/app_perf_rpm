@@ -24,9 +24,14 @@ module AppPerfRpm
       @worker = ::AppPerfRpm::Worker.new
 
       if @worker.start
+        @worker.configuration = configuration
         @worker_running = true
         AppPerfRpm.tracing_on
       end
+    end
+
+    def worker
+      @worker
     end
 
     def mutex

@@ -1,5 +1,7 @@
 module AppPerfRpm
   class Worker
+    attr_accessor :configuration
+
     def initialize
       AppPerfRpm.logger.info "Starting worker."
 
