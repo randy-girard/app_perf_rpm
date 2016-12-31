@@ -20,7 +20,11 @@ module AppPerfRpm
       def start_trace(layer, opts = {})
         self.trace_id ||= opts.delete(:trace_id) || generate_trace_id
 
-        result = trace(layer, opts) do
+        if trace?
+          result = trace(layer, opts) do
+            yield
+          end
+        else
           yield
         end
 
@@ -34,10 +38,8 @@ module AppPerfRpm
         result = yield
         duration = (Time.now.to_f - start) * 1000
 
-        if trace?
-          event = [layer, trace_id, start, duration, YAML::dump(opts)]
-          ::AppPerfRpm.store(event)
-        end
+        event = [layer, trace_id, start, duration, YAML::dump(opts)]
+        ::AppPerfRpm.store(event)
 
         result
       end
