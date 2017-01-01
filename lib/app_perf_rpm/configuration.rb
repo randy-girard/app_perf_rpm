@@ -25,7 +25,7 @@ module AppPerfRpm
     private
 
     def default_if_blank(value, default)
-      value.blank? ? default : value
+      value.nil? || value.blank? ? default : value
     end
   end
 end

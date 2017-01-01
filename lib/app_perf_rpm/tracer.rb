@@ -26,7 +26,11 @@ module AppPerfRpm
       end
 
       def trace?(duration = 0)
-        rand * 100 < ::AppPerfRpm.worker.configuration.sample_rate.to_i
+        random_percentage < ::AppPerfRpm.worker.configuration.sample_rate.to_i
+      end
+
+      def random_percentage
+        rand * 100
       end
 
       def start_trace(layer, opts = {})
