@@ -133,9 +133,9 @@ module AppPerfRpm
       return backtrace unless backtrace.is_a?(Array)
 
       length = backtrace.size
-      if length > 200
+      if length > 100
         # Trim backtraces by getting the first 180 and last 20 lines
-        trimmed = backtrace[0, 180] + ['...[snip]...'] + backtrace[length - 20, 20]
+        trimmed = backtrace[0, 80] + ['...[snip]...'] + backtrace[length - 20, 20]
       else
         trimmed = backtrace
       end
