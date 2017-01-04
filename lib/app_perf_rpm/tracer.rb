@@ -10,34 +10,29 @@ module AppPerfRpm
       end
 
       def tracing?
-        Thread.current[:tracing]
-      end
-
-      def tracing=(t)
-        Thread.current[:tracing] = t
-      end
-
-      def start_instance(layer, opts = {})
-        Instance.new(layer, opts)
+        Thread.current[:trace_id]
       end
 
       def in_trace?
         !Thread.current[:trace_id].nil?
       end
 
-      def trace?(duration = 0)
-        random_percentage < ::AppPerfRpm.worker.configuration.sample_rate.to_i
+      def start_instance(layer, opts = {})
+        Instance.new(layer, opts)
       end
 
       def random_percentage
         rand * 100
       end
 
-      def start_trace(layer, opts = {})
-        self.tracing = ::AppPerfRpm::Tracer.trace?
+      def should_trace?
+        random_percentage < ::AppPerfRpm.worker.configuration.sample_rate.to_i
+      end
 
-        if tracing?
-          self.trace_id ||= opts.delete(:trace_id) || generate_trace_id
+      def start_trace(layer, opts = {})
+        trace_id = opts.delete(:trace_id)
+        if trace_id || should_trace?
+          self.trace_id = trace_id || generate_trace_id
           result = trace(layer, opts) do
             yield
           end
@@ -50,8 +45,6 @@ module AppPerfRpm
       end
 
       def trace(layer, opts = {})
-        self.tracing = ::AppPerfRpm::Tracer.trace? if tracing?.nil?
-
         result = nil
 
         if tracing?
@@ -59,7 +52,7 @@ module AppPerfRpm
           result = yield
           duration = (Time.now.to_f - start) * 1000
 
-          event = [layer, trace_id, start, duration, YAML::dump(opts)]
+          event = [layer, self.trace_id, start, duration, YAML::dump(opts)]
           ::AppPerfRpm.store(event)
         else
           result = yield

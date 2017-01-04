@@ -15,6 +15,13 @@ module AppPerfRpm
           :url => req.path
         }
 
+        incoming_trace = env["HTTP_X_APP_PERF_TRACE"]
+        incoming_trace_id = env["HTTP_X_APP_PERF_TRACE_ID"]
+
+        if incoming_trace.to_s.eql?("1")
+          opts.merge!(:trace_id => incoming_trace_id)
+        end
+
         if ignore_path?(req.path)
           @status, @headers, @response = @app.call(env)
         else
