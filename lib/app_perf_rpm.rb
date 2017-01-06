@@ -1,6 +1,7 @@
 module AppPerfRpm
   require 'app_perf_rpm/logger'
   require 'app_perf_rpm/configuration'
+  require 'app_perf_rpm/dispatcher'
   require 'app_perf_rpm/worker'
   require 'app_perf_rpm/tracer'
   require 'app_perf_rpm/utils'
@@ -24,7 +25,6 @@ module AppPerfRpm
       @worker = ::AppPerfRpm::Worker.new
 
       if @worker.start
-        @worker.configuration = configuration
         @worker_running = true
         AppPerfRpm.tracing_on
       end
@@ -35,7 +35,7 @@ module AppPerfRpm
     end
 
     def mutex
-      @worker.mutex
+      @mutex ||= Mutex.new
     end
 
     def store(event)

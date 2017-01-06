@@ -19,7 +19,7 @@ module AppPerfRpm
 
               opts = {
                 :adapter => "mysql2",
-                :sql => sanitized_sql,
+                :query => sanitized_sql,
                 :name => name
               }
 

@@ -26,7 +26,7 @@ module AppPerfRpm
       end
 
       def should_trace?
-        random_percentage < ::AppPerfRpm.worker.configuration.sample_rate.to_i
+        random_percentage < ::AppPerfRpm.configuration.sample_rate.to_i
       end
 
       def start_trace(layer, opts = {})

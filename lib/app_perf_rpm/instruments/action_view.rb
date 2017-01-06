@@ -38,6 +38,40 @@ if defined?(::ActionView)
       end
     end
   else
+    ActionView::PartialRenderer.class_eval do
+      alias :render_partial_without_trace :render_partial
+      def render_partial
+        opts = {
+          :type => :render_partial,
+          :name => @options[:partial],
+          :file => __FILE__,
+          :line_number => __LINE__
+        }
+
+        opts.merge!(:backtrace => ::AppPerfRpm.clean_trace)
+
+        AppPerfRpm::Tracer.trace("actionview", opts) do
+          render_partial_without_trace
+        end
+      end
+
+      alias :render_collection_without_trace :render_collection
+      def render_collection
+        opts = {
+          :type => :render_partial_collection,
+          :name => @path,
+          :file => __FILE__,
+          :line_number => __LINE__
+        }
+
+        opts.merge!(:backtrace => ::AppPerfRpm.clean_trace)
+
+        AppPerfRpm::Tracer.trace("actionview", opts) do
+          render_collection_without_trace
+        end
+      end
+    end
+
     ::ActionView::TemplateRenderer.class_eval do
       alias render_with_layout_without_trace render_with_layout
 
