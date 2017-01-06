@@ -18,9 +18,8 @@ Gem::Specification.new do |s|
   s.homepage      = 'https://www.github.com/randy-girard/app_perf_rpm'
   s.license       = 'MIT'
 
+  s.add_development_dependency "rake"
   s.add_development_dependency "rspec"
   s.add_development_dependency "simplecov"
-  s.add_dependency "activesupport"
-  s.add_dependency "rake"
-  s.add_dependency "json"
+  s.add_runtime_dependency "oj"
 end

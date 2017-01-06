@@ -90,7 +90,7 @@ module AppPerfRpm
     end
 
     def app_root
-      if defined?(::Rails)
+      @app_root ||= if defined?(::Rails)
         if ::Rails::VERSION::MAJOR > 2
           Rails.root.to_s
         else

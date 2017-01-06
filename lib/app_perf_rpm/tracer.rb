@@ -52,7 +52,7 @@ module AppPerfRpm
           result = yield
           duration = (Time.now.to_f - start) * 1000
 
-          event = [layer, self.trace_id, start, duration, YAML::dump(opts)]
+          event = [layer, self.trace_id, start, duration, opts]
           ::AppPerfRpm.store(event)
         else
           result = yield
@@ -86,8 +86,7 @@ module AppPerfRpm
         def submit(opts = {})
           if ::AppPerfRpm::Tracer.tracing?
             self.opts.merge!(opts)
-            event = [layer, trace_id, start, duration, opts.to_json]
-            ::AppPerfRpm.store(event)
+            ::AppPerfRpm.store([layer, trace_id, start, duration, opts])
           end
         end
 

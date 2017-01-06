@@ -7,9 +7,9 @@ describe AppPerfRpm do
   context "trace header is set" do
     it "should trace with that trace key" do
       allow(Time).to receive(:now) { 0 }
-      expect(::AppPerfRpm).to receive(:store).with(["third", 1, 0.0, 0.0, "--- {}\n"]).once
-      expect(::AppPerfRpm).to receive(:store).with(["second", 1, 0.0, 0.0, "--- {}\n"]).once
-      expect(::AppPerfRpm).to receive(:store).with(["first", 1, 0.0, 0.0, "--- {}\n"]).once
+      expect(::AppPerfRpm).to receive(:store).with(["third", 1, 0.0, 0.0, {}]).once
+      expect(::AppPerfRpm).to receive(:store).with(["second", 1, 0.0, 0.0, {}]).once
+      expect(::AppPerfRpm).to receive(:store).with(["first", 1, 0.0, 0.0, {}]).once
 
       subject.start_trace("first", { :trace_id => 1 }) do
         subject.trace("second", {}) do
@@ -35,9 +35,9 @@ describe AppPerfRpm do
 
     it "should trace through all traces" do
       allow(Time).to receive(:now) { 0 }
-      expect(::AppPerfRpm).to receive(:store).with(["third", 1, 0.0, 0.0, "--- {}\n"]).once
-      expect(::AppPerfRpm).to receive(:store).with(["second", 1, 0.0, 0.0, "--- {}\n"]).once
-      expect(::AppPerfRpm).to receive(:store).with(["first", 1, 0.0, 0.0, "--- {}\n"]).once
+      expect(::AppPerfRpm).to receive(:store).with(["third", 1, 0.0, 0.0, {}]).once
+      expect(::AppPerfRpm).to receive(:store).with(["second", 1, 0.0, 0.0, {}]).once
+      expect(::AppPerfRpm).to receive(:store).with(["first", 1, 0.0, 0.0, {}]).once
 
       subject.start_trace("first", { :trace_id => 1 }) do
         subject.trace("second", {}) do
@@ -69,9 +69,9 @@ describe AppPerfRpm do
       expect(subject).to receive(:random_percentage).once { 51 }
       allow(Time).to receive(:now) { 0 }
       expect(Digest::SHA1).to receive(:hexdigest) { 1 }
-      expect(::AppPerfRpm).to receive(:store).with(["third", 1, 0.0, 0.0, "--- {}\n"]).once
-      expect(::AppPerfRpm).to receive(:store).with(["second", 1, 0.0, 0.0, "--- {}\n"]).once
-      expect(::AppPerfRpm).to receive(:store).with(["first", 1, 0.0, 0.0, "--- {}\n"]).once
+      expect(::AppPerfRpm).to receive(:store).with(["third", 1, 0.0, 0.0, {}]).once
+      expect(::AppPerfRpm).to receive(:store).with(["second", 1, 0.0, 0.0, {}]).once
+      expect(::AppPerfRpm).to receive(:store).with(["first", 1, 0.0, 0.0, {}]).once
 
       subject.start_trace("first", {}) do
         subject.trace("second", {}) do

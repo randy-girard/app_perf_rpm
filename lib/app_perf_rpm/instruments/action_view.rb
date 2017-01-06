@@ -58,7 +58,7 @@ if defined?(::ActionView)
       alias :render_collection_without_trace :render_collection
       def render_collection
         opts = {
-          :type => :render_partial_collection,
+          :type => :render_collection,
           :name => @path,
           :file => __FILE__,
           :line_number => __LINE__
