@@ -34,13 +34,21 @@ module AppPerfRpm
       include ::AppPerfRpm::Instruments::Sequel
 
       def run_with_trace(sql, opts = ::Sequel::OPTS)
-        options = parse_opts(sql, opts)
-        options.merge!(:backtrace => ::AppPerfRpm.clean_trace)
-        ::AppPerfRpm::Tracer.trace("sequel", options) do
+        if ::AppPerfRpm.tracing?
+          begin
+            options = parse_opts(sql, opts)
+            options.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
+            options.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+            ::AppPerfRpm::Tracer.trace("sequel", options) do
+              run_without_trace(sql, opts)
+            end
+          rescue => e
+            ::AppPerfRpm.logger.error e.inspect
+            raise
+          end
+        else
           run_without_trace(sql, opts)
         end
-      rescue => e
-        ::AppPerfRpm.logger.error e.inspect
       end
     end
 
@@ -48,13 +56,21 @@ module AppPerfRpm
       include ::AppPerfRpm::Instruments::Sequel
 
       def execute_with_trace(sql, opts = ::Sequel::OPTS, &block)
-        options = parse_opts(sql, opts)
-        options.merge!(:backtrace => ::AppPerfRpm.clean_trace)
-        ::AppPerfRpm::Tracer.trace("sequel", options) do
+        if ::AppPerfRpm.tracing?
+          begin
+            options = parse_opts(sql, opts)
+            options.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
+            options.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+            ::AppPerfRpm::Tracer.trace("sequel", options) do
+              execute_without_trace(sql, opts, &block)
+            end
+          rescue => e
+            ::AppPerfRpm.logger.error e.inspect
+            raise
+          end
+        else
           execute_without_trace(sql, opts, &block)
         end
-      rescue => e
-        ::AppPerfRpm.logger.error e.inspect
       end
     end
   end

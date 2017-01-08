@@ -15,17 +15,22 @@ module AppPerfRpm
             if ignore_trace?(name)
               execute_without_trace(sql, name)
             else
-              sanitized_sql = sanitize_sql(sql)
+              if ::AppPerfRpm.tracing?
+                sanitized_sql = sanitize_sql(sql)
 
-              opts = {
-                :adapter => "mysql2",
-                :query => sanitized_sql,
-                :name => name
-              }
+                opts = {
+                  :adapter => "mysql2",
+                  :query => sanitized_sql,
+                  :name => name
+                }
 
-              opts.merge!(:backtrace => ::AppPerfRpm.clean_trace)
+                opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
+                opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
 
-              AppPerfRpm::Tracer.trace('activerecord', opts || {}) do
+                AppPerfRpm::Tracer.trace('activerecord', opts || {}) do
+                  execute_without_trace(sql, name)
+                end
+              else
                 execute_without_trace(sql, name)
               end
             end

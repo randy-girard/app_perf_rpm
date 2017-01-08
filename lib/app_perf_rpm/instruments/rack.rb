@@ -25,7 +25,8 @@ module AppPerfRpm
         if ignore_path?(req.path)
           @status, @headers, @response = @app.call(env)
         else
-          opts.merge!(:backtrace => ::AppPerfRpm.clean_trace)
+          opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
+          opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
           AppPerfRpm::Tracer.start_trace("rack", opts) do
             @status, @headers, @response = @app.call(env)
           end

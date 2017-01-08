@@ -35,6 +35,7 @@ module AppPerfRpm
 
         loop do
           if @dispatcher.ready?
+            log_event(["metric", Time.now.to_f, {:name => "Memory", :value => `ps -o rss= -p #{Process.pid}`.to_i}])
             @dispatcher.dispatch
             @dispatcher.reset
           end

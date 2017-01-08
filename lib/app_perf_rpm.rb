@@ -1,8 +1,11 @@
+require 'oj'
+
 module AppPerfRpm
   require 'app_perf_rpm/logger'
   require 'app_perf_rpm/configuration'
   require 'app_perf_rpm/dispatcher'
   require 'app_perf_rpm/worker'
+  require 'app_perf_rpm/backtrace'
   require 'app_perf_rpm/tracer'
   require 'app_perf_rpm/utils'
   require 'app_perf_rpm/middleware'
@@ -21,6 +24,7 @@ module AppPerfRpm
     end
 
     def load
+      Oj.mimic_JSON
       AppPerfRpm::Instrumentation.load
       @worker = ::AppPerfRpm::Worker.new
 
@@ -82,13 +86,6 @@ module AppPerfRpm
       AppPerfRpm.tracing_on if @previously_tracing
     end
 
-    def clean_trace(ignore = 0)
-      bt = Kernel.caller
-      bt.slice!(0, ignore)
-      backtrace = trim_backtrace(bt)
-      mark_as_app(backtrace)
-    end
-
     def app_root
       @app_root ||= if defined?(::Rails)
         if ::Rails::VERSION::MAJOR > 2
@@ -119,27 +116,6 @@ module AppPerfRpm
       else
         return up.to_s
       end
-    end
-
-    def mark_as_app(backtrace)
-      backtrace.map {|bt|
-        bt.to_s[/^#{app_root}\//] ?
-          "*#{bt}" :
-          bt
-      }
-    end
-
-    def trim_backtrace(backtrace)
-      return backtrace unless backtrace.is_a?(Array)
-
-      length = backtrace.size
-      if length > 100
-        # Trim backtraces by getting the first 180 and last 20 lines
-        trimmed = backtrace[0, 80] + ['...[snip]...'] + backtrace[length - 20, 20]
-      else
-        trimmed = backtrace
-      end
-      trimmed
     end
   end
 end

@@ -20,50 +20,6 @@ describe AppPerfRpm do
     end
   end
 
-  describe "#clean_trace" do
-    it "returns cleaned trace with app marked" do
-      dir = File.dirname(__FILE__)
-      expect(Kernel).to receive(:caller) {
-        [
-          "#{dir}/example.rb:236:in `instance_exec'",
-          "#{dir}/example.rb:236:in `block in run'",
-          "#{dir}/example.rb:478:in `block in with_around_and_singleton_context_hooks'",
-          "#{dir}/example.rb:435:in `block in with_around_example_hooks'",
-          "#{dir}/hooks.rb:478:in `block in run'",
-          "#{dir}/hooks.rb:616:in `run_around_example_hooks_for'"
-        ]
-      }
-      expect(subject.clean_trace).to eq([
-        "*#{dir}/example.rb:236:in `instance_exec'",
-        "*#{dir}/example.rb:236:in `block in run'",
-        "*#{dir}/example.rb:478:in `block in with_around_and_singleton_context_hooks'",
-        "*#{dir}/example.rb:435:in `block in with_around_example_hooks'",
-        "*#{dir}/hooks.rb:478:in `block in run'",
-        "*#{dir}/hooks.rb:616:in `run_around_example_hooks_for'"])
-    end
-
-    it "returns cleaned trace without app marked" do
-      dir = File.dirname(__FILE__)
-      expect(Kernel).to receive(:caller) {
-        [
-          "example.rb:236:in `instance_exec'",
-          "example.rb:236:in `block in run'",
-          "example.rb:478:in `block in with_around_and_singleton_context_hooks'",
-          "example.rb:435:in `block in with_around_example_hooks'",
-          "hooks.rb:478:in `block in run'",
-          "hooks.rb:616:in `run_around_example_hooks_for'"
-        ]
-      }
-      expect(subject.clean_trace).to eq([
-        "example.rb:236:in `instance_exec'",
-        "example.rb:236:in `block in run'",
-        "example.rb:478:in `block in with_around_and_singleton_context_hooks'",
-        "example.rb:435:in `block in with_around_example_hooks'",
-        "hooks.rb:478:in `block in run'",
-        "hooks.rb:616:in `run_around_example_hooks_for'"])
-    end
-  end
-
   describe "#tracing on" do
     it "should turn tracing on" do
       expect(::AppPerfRpm).to receive(:mutex) { Mutex.new }.twice

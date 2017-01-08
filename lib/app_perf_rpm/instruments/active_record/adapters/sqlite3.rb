@@ -15,17 +15,22 @@ module AppPerfRpm
             if ignore_trace?(name)
               exec_query_without_trace(sql, name, binds)
             else
-              sanitized_sql = sanitize_sql(sql)
+              if ::AppPerfRpm.tracing?
+                sanitized_sql = sanitize_sql(sql)
 
-              opts = {
-                :adapter => "postgresql",
-                :query => sanitized_sql,
-                :name => name
-              }
+                opts = {
+                  :adapter => "postgresql",
+                  :query => sanitized_sql,
+                  :name => name
+                }
 
-              opts.merge!(:backtrace => ::AppPerfRpm.clean_trace)
+                opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
+                opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
 
-              AppPerfRpm::Tracer.trace('activerecord', opts) do
+                AppPerfRpm::Tracer.trace('activerecord', opts) do
+                  exec_query_without_trace(sql, name, binds)
+                end
+              else
                 exec_query_without_trace(sql, name, binds)
               end
             end
@@ -35,17 +40,22 @@ module AppPerfRpm
             if ignore_trace?(name)
               exec_delete_without_trace(sql, name, binds)
             else
-              sanitized_sql = sanitize_sql(sql)
+              if ::AppPerfRpm.tracing?
+                sanitized_sql = sanitize_sql(sql)
 
-              opts = {
-                :adapter => "postgresql",
-                :sql => sanitized_sql,
-                :name => name
-              }
+                opts = {
+                  :adapter => "postgresql",
+                  :sql => sanitized_sql,
+                  :name => name
+                }
 
-              opts.merge!(:backtrace => ::AppPerfRpm.clean_trace)
+                opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
+                opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
 
-              AppPerfRpm::Tracer.trace('activerecord', opts) do
+                AppPerfRpm::Tracer.trace('activerecord', opts) do
+                  exec_delete_without_trace(sql, name, binds)
+                end
+              else
                 exec_delete_without_trace(sql, name, binds)
               end
             end
@@ -55,27 +65,36 @@ module AppPerfRpm
             if ignore_trace?(name)
               exec_insert_without_trace(sql, name, binds, *args)
             else
-              sanitized_sql = sanitize_sql(sql)
+              if ::AppPerfRpm.tracing?
+                sanitized_sql = sanitize_sql(sql)
 
-              opts = {
-                :adapter => "postgresql",
-                :sql => sanitized_sql,
-                :name => name
-              }
+                opts = {
+                  :adapter => "postgresql",
+                  :sql => sanitized_sql,
+                  :name => name
+                }
 
-              opts.merge!(:backtrace => ::AppPerfRpm.clean_trace)
-              AppPerfRpm::Tracer.trace('activerecord', opts) do
+                opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
+                opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+                AppPerfRpm::Tracer.trace('activerecord', opts) do
+                  exec_insert_without_trace(sql, name, binds, *args)
+                end
+              else
                 exec_insert_without_trace(sql, name, binds, *args)
               end
             end
           end
 
           def begin_db_transaction_with_trace
-            opts = {
-              :adapter => "postgresql",
-              :sql => "BEGIN"
-            }
-            AppPerfRpm::Tracer.trace('activerecord', opts) do
+            if ::AppPerfRpm.tracing?
+              opts = {
+                :adapter => "postgresql",
+                :sql => "BEGIN"
+              }
+              AppPerfRpm::Tracer.trace('activerecord', opts) do
+                begin_db_transaction_without_trace
+              end
+            else
               begin_db_transaction_without_trace
             end
           end

@@ -12,7 +12,8 @@ module AppPerfRpm
         :domain => Socket.gethostname
       }
 
-      opts.merge!(:backtrace => ::AppPerfRpm.clean_trace)
+      opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
+      opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
 
       result = AppPerfRpm::Tracer.start_trace("sidekiq-worker", opts) do
         yield
@@ -24,15 +25,19 @@ module AppPerfRpm
 
   class SidekiqClient
     def call(*args)
-      worker, msg, queue = args
-      opts = {}
+      if ::AppPerfRpm.tracing?
+        worker, msg, queue = args
+        opts = {}
 
-      opts.merge!(:backtrace => ::AppPerfRpm.clean_trace)
+        opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
+        opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
 
-      result = AppPerfRpm::Tracer.trace("sidekiq-client", opts) do
-        yield
+        result = AppPerfRpm::Tracer.trace("sidekiq-client", opts) do
+          yield
+        end
+      else
+        reuslt = yield
       end
-
       result
     end
   end

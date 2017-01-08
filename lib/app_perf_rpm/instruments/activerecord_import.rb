@@ -4,24 +4,29 @@ module AppPerfRpm
       include AppPerfRpm::Utils
 
       def insert_many_with_trace( sql, values, *args )
-        sql_copy = sql.dup
-        base_sql, post_sql = if sql_copy.dup.is_a?( String )
-          [sql_copy, '']
-        elsif sql.is_a?( Array )
-          [sql_copy.shift, sql_copy.join( ' ' )]
-        end
+        if ::AppPerfRpm.tracing?
+          sql_copy = sql.dup
+          base_sql, post_sql = if sql_copy.dup.is_a?( String )
+            [sql_copy, '']
+          elsif sql.is_a?( Array )
+            [sql_copy.shift, sql_copy.join( ' ' )]
+          end
 
-        sanitized_sql = sanitize_sql(base_sql + values.join( ',' ) + post_sql)
+          sanitized_sql = sanitize_sql(base_sql + values.join( ',' ) + post_sql)
 
-        opts = {
-          :adapter => ::ActiveRecord::Base.connection_config[:adapter],
-          :sql => sanitized_sql,
-          :name => self.class.name
-        }
+          opts = {
+            :adapter => ::ActiveRecord::Base.connection_config[:adapter],
+            :sql => sanitized_sql,
+            :name => self.class.name
+          }
 
-        opts.merge!(:backtrace => ::AppPerfRpm.clean_trace)
+          opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
+          opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
 
-        AppPerfRpm::Tracer.trace('activerecord', opts) do
+          AppPerfRpm::Tracer.trace('activerecord', opts) do
+            insert_many_without_trace(sql, values, *args)
+          end
+        else
           insert_many_without_trace(sql, values, *args)
         end
       end

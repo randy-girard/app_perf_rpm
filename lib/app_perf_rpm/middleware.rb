@@ -21,7 +21,8 @@ module AppPerfRpm
         :method => env["REQUEST_METHOD"],
         :message => exception.message,
         :error_class => exception.class.to_s,
-        :backtrace => exception.backtrace
+        :backtrace => exception.backtrace,
+        :source => ::AppPerfRpm::Backtrace.source_extract(exception.backtrace)
       )
       raise exception
     end
