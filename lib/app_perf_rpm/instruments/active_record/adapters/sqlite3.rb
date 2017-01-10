@@ -5,17 +5,23 @@ module AppPerfRpm
         module Sqlite3
           include AppPerfRpm::Utils
 
+          IGNORE_STATEMENTS = {
+            "SCHEMA" => true,
+            "EXPLAIN" => true,
+            "CACHE" => true
+          }
+
           def ignore_trace?(name)
-            %w(SCHEMA EXPLAIN CACHE).include?(name.to_s) ||
+            IGNORE_STATEMENTS[name.to_s] ||
               (name && name.to_sym == :skip_logging) ||
               name == 'ActiveRecord::SchemaMigration Load'
           end
 
           def exec_query_with_trace(sql, name = nil, binds = [])
-            if ignore_trace?(name)
-              exec_query_without_trace(sql, name, binds)
-            else
-              if ::AppPerfRpm.tracing?
+            if ::AppPerfRpm::Tracer.tracing?
+              if ignore_trace?(name)
+                exec_query_without_trace(sql, name, binds)
+              else
                 sanitized_sql = sanitize_sql(sql)
 
                 opts = {
@@ -24,23 +30,22 @@ module AppPerfRpm
                   :name => name
                 }
 
-                opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-                opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+                opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
 
                 AppPerfRpm::Tracer.trace('activerecord', opts) do
                   exec_query_without_trace(sql, name, binds)
                 end
-              else
-                exec_query_without_trace(sql, name, binds)
               end
+            else
+              exec_query_without_trace(sql, name, binds)
             end
           end
 
           def exec_delete_with_trace(sql, name = nil, binds = [])
-            if ignore_trace?(name)
-              exec_delete_without_trace(sql, name, binds)
-            else
-              if ::AppPerfRpm.tracing?
+            if ::AppPerfRpm::Tracer.tracing?
+              if ignore_trace?(name)
+                exec_delete_without_trace(sql, name, binds)
+              else
                 sanitized_sql = sanitize_sql(sql)
 
                 opts = {
@@ -49,23 +54,22 @@ module AppPerfRpm
                   :name => name
                 }
 
-                opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-                opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+                opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
 
                 AppPerfRpm::Tracer.trace('activerecord', opts) do
                   exec_delete_without_trace(sql, name, binds)
                 end
-              else
-                exec_delete_without_trace(sql, name, binds)
               end
+            else
+              exec_delete_without_trace(sql, name, binds)
             end
           end
 
           def exec_insert_with_trace(sql, name = nil, binds = [], *args)
-            if ignore_trace?(name)
-              exec_insert_without_trace(sql, name, binds, *args)
-            else
-              if ::AppPerfRpm.tracing?
+            if ::AppPerfRpm::Tracer.tracing?
+              if ignore_trace?(name)
+                exec_insert_without_trace(sql, name, binds, *args)
+              else
                 sanitized_sql = sanitize_sql(sql)
 
                 opts = {
@@ -74,23 +78,26 @@ module AppPerfRpm
                   :name => name
                 }
 
-                opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-                opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+                opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+
                 AppPerfRpm::Tracer.trace('activerecord', opts) do
                   exec_insert_without_trace(sql, name, binds, *args)
                 end
-              else
-                exec_insert_without_trace(sql, name, binds, *args)
               end
+            else
+              exec_insert_without_trace(sql, name, binds, *args)
             end
           end
 
           def begin_db_transaction_with_trace
-            if ::AppPerfRpm.tracing?
+            if ::AppPerfRpm::Tracer.tracing?
               opts = {
                 :adapter => "postgresql",
                 :sql => "BEGIN"
               }
+
+              opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+
               AppPerfRpm::Tracer.trace('activerecord', opts) do
                 begin_db_transaction_without_trace
               end

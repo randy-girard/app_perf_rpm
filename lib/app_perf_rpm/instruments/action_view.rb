@@ -3,7 +3,7 @@ if defined?(::ActionView)
     ActionView::Partials.module_eval do
       alias :render_partial_without_trace :render_partial
       def render_partial(options = {})
-        if ::AppPerfRpm.tracing? && options.key?(:partial) && options[:partial].is_a?(String)
+        if ::AppPerfRpm::Tracer.tracing? && options.key?(:partial) && options[:partial].is_a?(String)
           opts = {
             :method => :render_partial,
             :name => options[:partial],
@@ -11,8 +11,7 @@ if defined?(::ActionView)
             :line_number => __LINE__
           }
 
-          opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-          opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
 
           AppPerfRpm::Tracer.trace("actionview", opts) do
             render_partial_without_trace(options)
@@ -24,7 +23,7 @@ if defined?(::ActionView)
 
       alias :render_partial_collection_without_trace :render_partial_collection
       def render_partial_collection(options = {})
-        if ::AppPerfRpm.tracing?
+        if ::AppPerfRpm::Tracer.tracing?
           opts = {
             :method => :render_partial_collection,
             :name => @path,
@@ -32,8 +31,7 @@ if defined?(::ActionView)
             :line_number => __LINE__
           }
 
-          opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-          opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
 
           AppPerfRpm::Tracer.trace("actionview", opts) do
             render_partial_collection_without_trace(options)
@@ -47,7 +45,7 @@ if defined?(::ActionView)
     ActionView::PartialRenderer.class_eval do
       alias :render_partial_without_trace :render_partial
       def render_partial
-        if ::AppPerfRpm.tracing?
+        if ::AppPerfRpm::Tracer.tracing?
           opts = {
             :method => :render_partial,
             :name => @options[:partial],
@@ -55,8 +53,7 @@ if defined?(::ActionView)
             :line_number => __LINE__
           }
 
-          opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-          opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
 
           AppPerfRpm::Tracer.trace("actionview", opts) do
             render_partial_without_trace
@@ -68,7 +65,7 @@ if defined?(::ActionView)
 
       alias :render_collection_without_trace :render_collection
       def render_collection
-        if ::AppPerfRpm.tracing?
+        if ::AppPerfRpm::Tracer.tracing?
           opts = {
             :method => :render_collection,
             :name => @path,
@@ -76,8 +73,7 @@ if defined?(::ActionView)
             :line_number => __LINE__
           }
 
-          opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-          opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
 
           AppPerfRpm::Tracer.trace("actionview", opts) do
             render_collection_without_trace
@@ -92,15 +88,14 @@ if defined?(::ActionView)
       alias render_with_layout_without_trace render_with_layout
 
       def render_with_layout(path, locals, *args, &block)
-        if ::AppPerfRpm.tracing?
+        if ::AppPerfRpm::Tracer.tracing?
           layout = nil
 
           opts = {
             :file => __FILE__,
             :line_number => __LINE__
           }
-          opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-          opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
 
           if path
             if method(:find_layout).arity == 3

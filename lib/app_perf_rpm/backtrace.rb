@@ -45,7 +45,11 @@ module AppPerfRpm
 
       private
       def filter_backtrace(backtrace)
-        @filters.each do |f|
+        limit = @filters.size
+        i = 0
+        while i < limit
+          f = @filters[i]
+          i += 1
           backtrace = backtrace.map { |line| f.call(line) }
         end
 
@@ -53,7 +57,11 @@ module AppPerfRpm
       end
 
       def silence(backtrace)
-        @silencers.each do |s|
+        limit = @silencers.size
+        i = 0
+        while i < limit
+          s = @silencers[i]
+          i += 1
           backtrace = backtrace.reject { |line| s.call(line) }
         end
 
@@ -83,6 +91,13 @@ module AppPerfRpm
 
       def backtrace
         Kernel.caller
+      end
+
+      def backtrace_and_source_extract(_backtrace = ::AppPerfRpm::Backtrace.application_trace)
+        {
+          :backtrace => _backtrace,
+          :source => source_extract(_backtrace)
+        }
       end
 
       def clean_backtrace(*args)

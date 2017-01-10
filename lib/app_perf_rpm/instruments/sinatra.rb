@@ -3,14 +3,13 @@ module AppPerfRpm
     module Sinatra
       module Base
         def dispatch_with_trace
-          if ::AppPerfRpm.tracing?
+          if ::AppPerfRpm::Tracer.tracing?
             opts = {
               :controller => self.class.to_s,
               :action => env["PATH_INFO"]
             }
 
-            opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-            opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+            opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
 
             ::AppPerfRpm::Tracer.trace("sinatra", opts) do
               dispatch_without_trace
@@ -27,7 +26,7 @@ module AppPerfRpm
 
       module Templates
         def render_with_trace(engine, data, options = {}, locals = {}, &block)
-          if ::AppPerfRpm.tracing?
+          if ::AppPerfRpm::Tracer.tracing?
             name = data
             opts = {}
             opts[:engine] = engine
@@ -35,8 +34,7 @@ module AppPerfRpm
             opts[:type] = :render
             opts[:file] = __FILE__
             opts[:line_number] = __LINE__
-            opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-            opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+            opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
 
             ::AppPerfRpm::Tracer.trace("sinatra", opts) do
               render_without_trace(engine, data, options, locals, &block)
@@ -60,7 +58,7 @@ if defined?(::Sinatra)
     ::Sinatra::Base.class_eval do
       alias_method :dispatch_without_trace, :dispatch!
       alias_method :dispatch!, :dispatch_with_trace
-      alias_method :handle_exceptio_without_trace, :handle_exception!
+      alias_method :handle_exception_without_trace, :handle_exception!
       alias_method :handle_exception!, :handle_exception_with_trace
     end
 

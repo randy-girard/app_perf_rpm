@@ -3,7 +3,7 @@ if defined?(Net::HTTP)
 
   Net::HTTP.class_eval do
     def request_with_trace(*args, &block)
-      if ::AppPerfRpm.tracing?
+      if ::AppPerfRpm::Tracer.tracing?
         opts = {}
 
         if args.length && args[0]
@@ -16,12 +16,11 @@ if defined?(Net::HTTP)
         end
 
         trace = ::AppPerfRpm::Tracer.start_instance("net-http")
-        opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-        opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+        opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
         response = request_without_trace(*args, &block)
         trace.finish
         opts[:status] = response.code
-        if ((300..308).to_a.include? response.code.to_i) && response.header["Location"]
+        if (response.code.to_i >= 300 || response.code.to_i <= 308) && response.header["Location"]
           opts[:location] = response.header["Location"]
         end
         trace.submit(opts)

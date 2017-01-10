@@ -4,7 +4,7 @@ module AppPerfRpm
       include AppPerfRpm::Utils
 
       def insert_many_with_trace( sql, values, *args )
-        if ::AppPerfRpm.tracing?
+        if ::AppPerfRpm::Tracer.tracing?
           sql_copy = sql.dup
           base_sql, post_sql = if sql_copy.dup.is_a?( String )
             [sql_copy, '']
@@ -20,8 +20,7 @@ module AppPerfRpm
             :name => self.class.name
           }
 
-          opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-          opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
 
           AppPerfRpm::Tracer.trace('activerecord', opts) do
             insert_many_without_trace(sql, values, *args)

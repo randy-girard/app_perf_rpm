@@ -2,14 +2,13 @@ module AppPerfRpm
   module Instruments
     module ActionController
       def process_action_with_trace(method_name, *args)
-        if ::AppPerfRpm.tracing?
+        if ::AppPerfRpm::Tracer.tracing?
           opts = {
             :controller => self.class.name,
             :action => self.action_name
           }
 
-          opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-          opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
 
           AppPerfRpm::Tracer.trace('actioncontroller', opts) do
             process_action_without_trace(method_name, *args)
@@ -20,14 +19,13 @@ module AppPerfRpm
       end
 
       def perform_action_with_trace(*arguments)
-        if ::AppPerfRpm.tracing?
+        if ::AppPerfRpm::Tracer.tracing?
           opts = {
             :controller  => @_request.path_parameters['controller'],
             :action      => @_request.path_parameters['action']
           }
 
-          opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-          opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
 
           AppPerfRpm::Tracer.trace('actioncontroller', opts) do
             perform_action_without_trace(*arguments)

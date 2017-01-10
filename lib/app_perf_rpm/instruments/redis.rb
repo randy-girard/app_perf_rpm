@@ -2,10 +2,9 @@ module AppPerf
   module Instruments
     module Redis
       def call_with_trace(command, &block)
-        if ::AppPerfRpm.tracing?
+        if ::AppPerfRpm::Tracer.tracing?
           opts = {}
-          opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-          opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
           ::AppPerfRpm::Tracer.trace("redis", opts) do
             call_without_trace(command, &block)
           end
@@ -15,10 +14,9 @@ module AppPerf
       end
 
       def call_pipeline_with_trace(pipeline)
-        if ::AppPerfRpm.tracing?
+        if ::AppPerfRpm::Tracer.tracing?
           opts = {}
-          opts.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-          opts.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
+          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
           ::AppPerfRpm::Tracer.trace("redis", opts) do
             call_pipeline_without_trace(pipeline)
           end
