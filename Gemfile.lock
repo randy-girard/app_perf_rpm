@@ -3,12 +3,14 @@ PATH
   specs:
     app_perf_rpm (0.0.1)
       oj
+      sys-cpu
 
 GEM
   remote: https://rubygems.org/
   specs:
     diff-lcs (1.2.5)
     docile (1.1.5)
+    ffi (1.9.14)
     json (2.0.2)
     oj (2.18.0)
     rake (12.0.0)
@@ -30,6 +32,8 @@ GEM
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
     simplecov-html (0.10.0)
+    sys-cpu (0.7.2)
+      ffi
 
 PLATFORMS
   ruby

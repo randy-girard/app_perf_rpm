@@ -10,6 +10,7 @@ module AppPerfRpm
   require 'app_perf_rpm/utils'
   require 'app_perf_rpm/middleware'
   require 'app_perf_rpm/instrumentation'
+  require 'app_perf_rpm/monitoring'
   require 'app_perf_rpm/rails'
 
   class << self
@@ -26,6 +27,7 @@ module AppPerfRpm
     def load
       Oj.mimic_JSON
       AppPerfRpm::Instrumentation.load
+      AppPerfRpm::Monitoring.load
       @worker = ::AppPerfRpm::Worker.new
 
       if @worker.start
@@ -46,11 +48,6 @@ module AppPerfRpm
       if @worker_running && tracing?
         @worker.save(event)
       end
-      event
-    end
-
-    def log_event(event)
-      @worker.log_event(event)
       event
     end
 

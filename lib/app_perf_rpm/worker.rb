@@ -3,16 +3,13 @@ module AppPerfRpm
     def initialize
       AppPerfRpm.logger.info "Starting worker."
       @dispatcher = Dispatcher.new
+      @monitoring = Monitoring.new
     end
 
     def save(event)
       start
       return if event.nil?
       @dispatcher.add_event(event)
-    end
-
-    def log_event(event)
-      save(event)
     end
 
     def start
@@ -34,8 +31,8 @@ module AppPerfRpm
         @dispatcher.reset
 
         loop do
+          @monitoring.tick
           if @dispatcher.ready?
-            log_event(["metric", Time.now.to_f, {:name => "Memory", :value => `ps -o rss= -p #{Process.pid}`.to_i}])
             @dispatcher.dispatch
             @dispatcher.reset
           end
