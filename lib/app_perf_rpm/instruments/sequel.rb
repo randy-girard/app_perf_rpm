@@ -33,21 +33,21 @@ module AppPerfRpm
     module SequelDatabase
       include ::AppPerfRpm::Instruments::Sequel
 
-      def run_with_trace(sql, opts = ::Sequel::OPTS)
+      def run_with_trace(sql, options = ::Sequel::OPTS)
         if ::AppPerfRpm::Tracer.tracing?
           begin
-            options = parse_opts(sql, opts)
-            #options.merge!(:backtrace => ::AppPerfRpm::Backtrace.backtrace)
-            #options.merge!(:source => ::AppPerfRpm::Backtrace.source_extract)
-            ::AppPerfRpm::Tracer.trace("sequel", options) do
-              run_without_trace(sql, opts)
+            opts = parse_opts(sql, options)
+            opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+            opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+            ::AppPerfRpm::Tracer.trace("sequel", opts) do
+              run_without_trace(sql, options)
             end
           rescue => e
             ::AppPerfRpm.logger.error e.inspect
             raise
           end
         else
-          run_without_trace(sql, opts)
+          run_without_trace(sql, options)
         end
       end
     end
@@ -55,20 +55,21 @@ module AppPerfRpm
     module SequelDataset
       include ::AppPerfRpm::Instruments::Sequel
 
-      def execute_with_trace(sql, opts = ::Sequel::OPTS, &block)
+      def execute_with_trace(sql, options = ::Sequel::OPTS, &block)
         if ::AppPerfRpm::Tracer.tracing?
           begin
-            options = parse_opts(sql, opts)
-            options.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
-            ::AppPerfRpm::Tracer.trace("sequel", options) do
-              execute_without_trace(sql, opts, &block)
+            opts = parse_opts(sql, options)
+            opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+            opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+            ::AppPerfRpm::Tracer.trace("sequel", opts) do
+              execute_without_trace(sql, options, &block)
             end
           rescue => e
             ::AppPerfRpm.logger.error e.inspect
             raise
           end
         else
-          execute_without_trace(sql, opts, &block)
+          execute_without_trace(sql, options, &block)
         end
       end
     end

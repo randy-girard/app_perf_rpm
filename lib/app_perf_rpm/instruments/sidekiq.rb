@@ -12,7 +12,8 @@ module AppPerfRpm
         :domain => Socket.gethostname
       }
 
-      opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+      opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+      opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
       result = AppPerfRpm::Tracer.start_trace("sidekiq-worker", opts) do
         yield
@@ -27,8 +28,8 @@ module AppPerfRpm
       if ::AppPerfRpm::Tracer.tracing?
         worker, msg, queue = args
         opts = {}
-
-        opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+        opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+        opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
         result = AppPerfRpm::Tracer.trace("sidekiq-client", opts) do
           yield

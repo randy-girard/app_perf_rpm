@@ -8,7 +8,7 @@ module AppPerfRpm
             :action => self.action_name
           }
 
-          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+          opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
           AppPerfRpm::Tracer.trace('actioncontroller', opts) do
             process_action_without_trace(method_name, *args)
@@ -25,7 +25,7 @@ module AppPerfRpm
             :action      => @_request.path_parameters['action']
           }
 
-          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+          opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
           AppPerfRpm::Tracer.trace('actioncontroller', opts) do
             perform_action_without_trace(*arguments)

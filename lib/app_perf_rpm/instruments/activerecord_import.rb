@@ -20,7 +20,8 @@ module AppPerfRpm
             :name => self.class.name
           }
 
-          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+          opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+          opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
           AppPerfRpm::Tracer.trace('activerecord', opts) do
             insert_many_without_trace(sql, values, *args)

@@ -30,7 +30,8 @@ module AppPerfRpm
                   :name => name
                 }
 
-                opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+                opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+                opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
                 AppPerfRpm::Tracer.trace('activerecord', opts) do
                   exec_query_without_trace(sql, name, binds)
@@ -54,7 +55,8 @@ module AppPerfRpm
                   :name => name
                 }
 
-                opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+                opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+                opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
                 AppPerfRpm::Tracer.trace('activerecord', opts) do
                   exec_delete_without_trace(sql, name, binds)
@@ -78,7 +80,8 @@ module AppPerfRpm
                   :name => name
                 }
 
-                opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+                opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+                opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
                 AppPerfRpm::Tracer.trace('activerecord', opts) do
                   exec_insert_without_trace(sql, name, binds, *args)
@@ -96,7 +99,8 @@ module AppPerfRpm
                 :sql => "BEGIN"
               }
 
-              opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+              opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+              opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
               AppPerfRpm::Tracer.trace('activerecord', opts) do
                 begin_db_transaction_without_trace

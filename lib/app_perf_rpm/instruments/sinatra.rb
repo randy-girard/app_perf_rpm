@@ -9,7 +9,8 @@ module AppPerfRpm
               :action => env["PATH_INFO"]
             }
 
-            opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+            opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+            opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
             ::AppPerfRpm::Tracer.trace("sinatra", opts) do
               dispatch_without_trace
@@ -34,7 +35,8 @@ module AppPerfRpm
             opts[:type] = :render
             opts[:file] = __FILE__
             opts[:line_number] = __LINE__
-            opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+            opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+            opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
             ::AppPerfRpm::Tracer.trace("sinatra", opts) do
               render_without_trace(engine, data, options, locals, &block)

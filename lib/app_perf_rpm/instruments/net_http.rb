@@ -16,7 +16,8 @@ if defined?(Net::HTTP)
         end
 
         trace = ::AppPerfRpm::Tracer.start_instance("net-http")
-        opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+        opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+        opts[:source] = ::AppPerfRpm::Backtrace.source_extract
         response = request_without_trace(*args, &block)
         trace.finish
         opts[:status] = response.code

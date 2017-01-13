@@ -11,9 +11,7 @@ if defined?(::ActionView)
             :line_number => __LINE__
           }
 
-          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
-
-          AppPerfRpm::Tracer.trace("actionview", opts) do
+          AppPerfRpm::Tracer.profile("actionview", opts, true) do
             render_partial_without_trace(options)
           end
         else
@@ -31,9 +29,7 @@ if defined?(::ActionView)
             :line_number => __LINE__
           }
 
-          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
-
-          AppPerfRpm::Tracer.trace("actionview", opts) do
+          AppPerfRpm::Tracer.profile("actionview", opts, true) do
             render_partial_collection_without_trace(options)
           end
         else
@@ -53,9 +49,7 @@ if defined?(::ActionView)
             :line_number => __LINE__
           }
 
-          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
-
-          AppPerfRpm::Tracer.trace("actionview", opts) do
+          AppPerfRpm::Tracer.profile("actionview", opts, true) do
             render_partial_without_trace
           end
         else
@@ -73,9 +67,7 @@ if defined?(::ActionView)
             :line_number => __LINE__
           }
 
-          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
-
-          AppPerfRpm::Tracer.trace("actionview", opts) do
+          AppPerfRpm::Tracer.profile("actionview", opts, true) do
             render_collection_without_trace
           end
         else
@@ -95,7 +87,6 @@ if defined?(::ActionView)
             :file => __FILE__,
             :line_number => __LINE__
           }
-          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
 
           if path
             if method(:find_layout).arity == 3
@@ -113,12 +104,12 @@ if defined?(::ActionView)
             opts[:method] = :render_with_layout
             opts[:name] = layout.identifier
             opts[:layout] = layout
-            AppPerfRpm::Tracer.trace("actionview", opts) do
+            AppPerfRpm::Tracer.profile("actionview", opts, true) do
               render_with_layout_without_trace(path, locals, *args, &block)
             end
           else
             opts[:method] = :render_without_layout
-            AppPerfRpm::Tracer.trace("actionview", opts) do
+            AppPerfRpm::Tracer.profile("actionview", opts, true) do
               render_with_layout_without_trace(path, locals, *args, &block)
             end
           end

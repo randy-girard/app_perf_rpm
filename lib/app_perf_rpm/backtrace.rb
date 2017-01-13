@@ -89,19 +89,16 @@ module AppPerfRpm
         clean_backtrace(:all)
       end
 
-      def backtrace
+      def base_backtrace
         Kernel.caller
       end
 
-      def backtrace_and_source_extract(_backtrace = ::AppPerfRpm::Backtrace.application_trace)
-        {
-          :backtrace => _backtrace,
-          :source => source_extract(_backtrace)
-        }
+      def backtrace
+        base_backtrace
       end
 
       def clean_backtrace(*args)
-        backtrace_cleaner.clean(backtrace, *args)
+        backtrace_cleaner.clean(base_backtrace, *args)
       end
 
       def backtrace_cleaner
@@ -129,7 +126,7 @@ module AppPerfRpm
         end
       end
 
-      def source_extracts(_backtrace = Kernel.caller)
+      def source_extracts(_backtrace = base_backtrace)
         _backtrace.map do |trace|
           file, line_number = extract_file_and_line_number(trace)
 
@@ -159,15 +156,15 @@ module AppPerfRpm
         [file, line.to_i]
       end
 
-      def trim_backtrace(backtrace)
-        return backtrace unless backtrace.is_a?(Array)
+      def trim_backtrace(_backtrace)
+        return _backtrace unless _backtrace.is_a?(Array)
 
-        length = backtrace.size
+        length = _backtrace.size
         if length > 100
           # Trim backtraces by getting the first 180 and last 20 lines
-          trimmed = backtrace[0, 80] + ['...[snip]...'] + backtrace[length - 20, 20]
+          trimmed = _backtrace[0, 80] + ['...[snip]...'] + _backtrace[length - 20, 20]
         else
-          trimmed = backtrace
+          trimmed = _backtrace
         end
         trimmed
       end

@@ -12,7 +12,8 @@ module AppPerfRpm
             :domain => Socket.gethostname
           }
 
-          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+          opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+          opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
           ::AppPerfRpm::Tracer.start_trace("emque-consuming", opts) do
             route_without_trace(topic, type, message)

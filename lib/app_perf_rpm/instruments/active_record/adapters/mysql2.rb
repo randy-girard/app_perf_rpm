@@ -30,7 +30,8 @@ module AppPerfRpm
                   :name => name
                 }
 
-                opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+                opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+                opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
                 AppPerfRpm::Tracer.trace('activerecord', opts || {}) do
                   execute_without_trace(sql, name)

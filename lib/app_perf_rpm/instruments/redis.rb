@@ -4,7 +4,8 @@ module AppPerf
       def call_with_trace(command, &block)
         if ::AppPerfRpm::Tracer.tracing?
           opts = {}
-          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+          opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+          opts[:source] = ::AppPerfRpm::Backtrace.source_extract
           ::AppPerfRpm::Tracer.trace("redis", opts) do
             call_without_trace(command, &block)
           end
@@ -16,7 +17,8 @@ module AppPerf
       def call_pipeline_with_trace(pipeline)
         if ::AppPerfRpm::Tracer.tracing?
           opts = {}
-          opts.merge!(::AppPerfRpm::Backtrace.backtrace_and_source_extract)
+          opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+          opts[:source] = ::AppPerfRpm::Backtrace.source_extract
           ::AppPerfRpm::Tracer.trace("redis", opts) do
             call_pipeline_without_trace(pipeline)
           end
