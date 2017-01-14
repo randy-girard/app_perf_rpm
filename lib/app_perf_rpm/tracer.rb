@@ -61,27 +61,6 @@ module AppPerfRpm
         result
       end
 
-      def profile(layer, opts = {}, with_backtrace = false)
-        result = nil
-
-        if tracing?
-          if with_backtrace
-            opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-            opts[:source] = ::AppPerfRpm::Backtrace.source_extract
-          end
-          start = Time.now.to_f
-          result = yield
-          duration = (Time.now.to_f - start) * 1000
-
-          event = [layer, self.trace_id, start, duration, opts]
-          ::AppPerfRpm.store(event)
-        else
-          result = yield
-        end
-
-        result
-      end
-
       def log_event(event, opts = {})
         ::AppPerfRpm.store([event, generate_trace_id, Time.now.to_f, opts])
       end

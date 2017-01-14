@@ -60,7 +60,7 @@ module AppPerfRpm
           begin
             opts = parse_opts(sql, options)
             opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-            opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+            opts[:source] = ::AppPerfRpm::Backtrace.source_extract(opts[:backtrace])
             ::AppPerfRpm::Tracer.trace("sequel", opts) do
               execute_without_trace(sql, options, &block)
             end

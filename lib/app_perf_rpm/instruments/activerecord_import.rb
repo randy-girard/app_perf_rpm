@@ -16,7 +16,7 @@ module AppPerfRpm
 
           opts = {
             :adapter => ::ActiveRecord::Base.connection_config[:adapter],
-            :sql => sanitized_sql,
+            :query => sanitized_sql,
             :name => self.class.name
           }
 

@@ -98,6 +98,7 @@ module AppPerfRpm
                 :adapter => "postgresql",
                 :sql => "BEGIN"
               }
+
               opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
               opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 

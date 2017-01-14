@@ -1,5 +1,5 @@
 if defined?(::ActionView)
-  if Rails::VERSION::MAJOR == 2
+  if defined?(Rails) && Rails::VERSION::MAJOR == 2
     ActionView::Partials.module_eval do
       alias :render_partial_without_trace :render_partial
       def render_partial(options = {})
@@ -11,7 +11,10 @@ if defined?(::ActionView)
             :line_number => __LINE__
           }
 
-          AppPerfRpm::Tracer.profile("actionview", opts, true) do
+          opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+          opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+
+          AppPerfRpm::Tracer.trace("actionview", opts) do
             render_partial_without_trace(options)
           end
         else
@@ -29,7 +32,10 @@ if defined?(::ActionView)
             :line_number => __LINE__
           }
 
-          AppPerfRpm::Tracer.profile("actionview", opts, true) do
+          opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+          opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+
+          AppPerfRpm::Tracer.trace("actionview", opts) do
             render_partial_collection_without_trace(options)
           end
         else
@@ -49,7 +55,10 @@ if defined?(::ActionView)
             :line_number => __LINE__
           }
 
-          AppPerfRpm::Tracer.profile("actionview", opts, true) do
+          opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+          opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+
+          AppPerfRpm::Tracer.trace("actionview", opts) do
             render_partial_without_trace
           end
         else
@@ -67,7 +76,10 @@ if defined?(::ActionView)
             :line_number => __LINE__
           }
 
-          AppPerfRpm::Tracer.profile("actionview", opts, true) do
+          opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+          opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+
+          AppPerfRpm::Tracer.trace("actionview", opts) do
             render_collection_without_trace
           end
         else
@@ -88,6 +100,9 @@ if defined?(::ActionView)
             :line_number => __LINE__
           }
 
+          opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
+          opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+
           if path
             if method(:find_layout).arity == 3
               # Rails 5
@@ -104,12 +119,12 @@ if defined?(::ActionView)
             opts[:method] = :render_with_layout
             opts[:name] = layout.identifier
             opts[:layout] = layout
-            AppPerfRpm::Tracer.profile("actionview", opts, true) do
+            AppPerfRpm::Tracer.trace("actionview", opts) do
               render_with_layout_without_trace(path, locals, *args, &block)
             end
           else
             opts[:method] = :render_without_layout
-            AppPerfRpm::Tracer.profile("actionview", opts, true) do
+            AppPerfRpm::Tracer.trace("actionview", opts) do
               render_with_layout_without_trace(path, locals, *args, &block)
             end
           end

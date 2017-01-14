@@ -1,146 +1,65 @@
 module AppPerfRpm
   class Backtrace
-    class Cleaner
-      def initialize
-        @filters, @silencers = [], []
+    class << self
+      def backtrace
+        bt = Kernel.caller
+        bt = clean(bt)
+        trim_backtrace(bt)
       end
 
-      def clean(backtrace, kind = :silent)
-        filtered = filter_backtrace(backtrace)
+      def clean(backtrace)
+        backtrace
+          .map {|b| clean_line(b) }
+          .select {|b| b !~ %r{lib/app_perf_rpm} }
+      end
 
-        case kind
-        when :silent
-          silence(filtered)
-        when :noise
-          noise(filtered)
-        else
-          filtered
+      #def source_extract(_backtrace = Kernel.caller(2))
+      #  if(trace = _backtrace.first)
+      #    file, line_number = extract_file_and_line_number(trace)
+
+      #    {
+      #      code: source_fragment(file, line_number),
+      #      line_number: line_number
+      #    }
+      #  else
+      #    nil
+      #  end
+      #end
+
+      def source_extract(_backtrace = Kernel.caller(0))
+        _backtrace.select {|bt| bt[/^#{::AppPerfRpm.app_root}\//] }.map do |trace|
+          file, line_number = extract_file_and_line_number(trace)
+          source_to_hash(file, line_number)
         end
       end
-      alias :filter :clean
 
-      def add_filter(&block)
-        @filters << block
-      end
-
-      def add_silencer(&block)
-        @silencers << block
-      end
-
-      def add_gem_filters
-        gems_paths = (Gem.path | [Gem.default_dir]).map { |p| Regexp.escape(p) }
-        return if gems_paths.empty?
-
-        gems_regexp = %r{(#{gems_paths.join('|')})/gems/([^/]+)-([\w.]+)/(.*)}
-        add_filter { |line| line.sub(gems_regexp, '\2 (\3) \4') }
-      end
-
-      def remove_silencers!
-        @silencers = []
-      end
-
-      def remove_filters!
-        @filters = []
+      def source_to_hash(file, line_number)
+        {
+          file: clean_line(file),
+          code: source_fragment(file, line_number),
+          line_number: line_number
+        }
       end
 
       private
-      def filter_backtrace(backtrace)
-        limit = @filters.size
-        i = 0
-        while i < limit
-          f = @filters[i]
-          i += 1
-          backtrace = backtrace.map { |line| f.call(line) }
-        end
 
-        backtrace
+      def clean_line(line)
+        line
+          .sub(/#{::AppPerfRpm.app_root}\//, "[APP_PATH]/")
+          .sub(gems_regexp, '\2 (\3) [GEM_PATH]/\4')
       end
 
-      def silence(backtrace)
-        limit = @silencers.size
-        i = 0
-        while i < limit
-          s = @silencers[i]
-          i += 1
-          backtrace = backtrace.reject { |line| s.call(line) }
-        end
-
-        backtrace
-      end
-
-      def noise(backtrace)
-        backtrace - silence(backtrace)
-      end
-    end
-
-    class << self
-      APP_DIRS_PATTERN = /^\/?(app|config|lib|test)/
-      RENDER_TEMPLATE_PATTERN = /:in `_render_template_\w*'/
-
-      def application_trace
-        clean_backtrace(:silent)
-      end
-
-      def framework_trace
-        clean_backtrace(:noise)
-      end
-
-      def full_trace
-        clean_backtrace(:all)
-      end
-
-      def base_backtrace
-        Kernel.caller
-      end
-
-      def backtrace
-        base_backtrace
-      end
-
-      def clean_backtrace(*args)
-        backtrace_cleaner.clean(base_backtrace, *args)
-      end
-
-      def backtrace_cleaner
-        if @backtrace_cleaner.nil?
-          @backtrace_cleaner = ::AppPerfRpm::Backtrace::Cleaner.new
-          @backtrace_cleaner.add_filter   { |line| line.sub("#{::AppPerfRpm.app_root}/", '') }
-          @backtrace_cleaner.add_filter   { |line| line.sub(RENDER_TEMPLATE_PATTERN, '') }
-          @backtrace_cleaner.add_filter   { |line| line.sub('./', '/') }
-          @backtrace_cleaner.add_gem_filters
-          @backtrace_cleaner.add_silencer { |line| line !~ APP_DIRS_PATTERN }
-        end
-        @backtrace_cleaner
-      end
-
-      def source_extract(_backtrace = ::AppPerfRpm::Backtrace.application_trace)
-        if(trace = _backtrace.first)
-          file, line_number = extract_file_and_line_number(trace)
-
-          {
-            code: source_fragment(file, line_number),
-            line_number: line_number
-          }
+      def gems_regexp
+        gems_paths = (Gem.path | [Gem.default_dir]).map { |p| Regexp.escape(p) }
+        if gems_paths
+          %r{(#{gems_paths.join('|')})/gems/([^/]+)-([\w.]+)/(.*)}
         else
           nil
         end
       end
 
-      def source_extracts(_backtrace = base_backtrace)
-        _backtrace.map do |trace|
-          file, line_number = extract_file_and_line_number(trace)
-
-          {
-            code: source_fragment(file, line_number),
-            line_number: line_number
-          }
-        end
-      end
-
-      private
-
       def source_fragment(path, line)
-        return unless Rails.respond_to?(:root) && Rails.root
+        return unless defined?(Rails) && Rails.respond_to?(:root) && Rails.root
         full_path = Rails.root.join(path)
         if File.exist?(full_path)
           File.open(full_path, "r") do |file|

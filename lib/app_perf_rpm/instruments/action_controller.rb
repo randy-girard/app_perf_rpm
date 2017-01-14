@@ -8,6 +8,7 @@ module AppPerfRpm
             :action => self.action_name
           }
 
+          opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
           opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
           AppPerfRpm::Tracer.trace('actioncontroller', opts) do
@@ -25,6 +26,7 @@ module AppPerfRpm
             :action      => @_request.path_parameters['action']
           }
 
+          opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
           opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
           AppPerfRpm::Tracer.trace('actioncontroller', opts) do
