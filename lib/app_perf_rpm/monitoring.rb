@@ -15,9 +15,8 @@ module AppPerfRpm
     end
 
     def monitors
-      @monitors ||= ObjectSpace
-        .each_object(::AppPerfRpm::Monitors::Base)
-        .select { |klass| klass < self }
+      @monitors ||= ::AppPerfRpm::Monitors::Base
+        .descendants
         .map(&:new)
     end
 

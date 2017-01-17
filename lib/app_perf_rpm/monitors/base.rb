@@ -1,6 +1,10 @@
 module AppPerfRpm
   module Monitors
     class Base
+      def self.descendants
+        @descendants ||= ObjectSpace.each_object(Class).select { |klass| klass < self }
+      end
+      
       def initialize
         reset
       end

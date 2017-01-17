@@ -61,6 +61,39 @@ module AppPerfRpm
         result
       end
 
+      def profile(layer, opts = {})
+        if defined?(TracePoint)
+          @times = {}
+          traces = []
+          tracer = TracePoint.new(:call, :return) do |tp|
+            backtrace = caller(0)
+            key = "#{tp.defined_class}_#{tp.method_id}_#{backtrace.size}"
+            if tp.event == :call
+              @times[key] = Time.now.to_f
+            else
+              if @times[key]
+                @times[key] = Time.now.to_f - @times[key].to_f
+                traces << {
+                  :duration => @times[key].to_f,
+                  :class => tp.defined_class,
+                  :method => tp.method_id,
+                  :backtrace => backtrace,
+                  :line => ::AppPerfRpm::Backtrace.send(:clean_line, tp.path),
+                  :line_number => tp.lineno
+                }
+              end
+            end
+          end
+
+          result = tracer.enable { yield }
+          @times = {}
+
+          return traces, result
+        else
+          return [], yield
+        end
+      end
+
       def log_event(event, opts = {})
         ::AppPerfRpm.store([event, generate_trace_id, Time.now.to_f, opts])
       end

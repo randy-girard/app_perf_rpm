@@ -6,9 +6,7 @@ if defined?(::ActionView)
         if ::AppPerfRpm::Tracer.tracing? && options.key?(:partial) && options[:partial].is_a?(String)
           opts = {
             :method => :render_partial,
-            :name => options[:partial],
-            :file => __FILE__,
-            :line_number => __LINE__
+            :name => options[:partial]
           }
 
           opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
@@ -27,9 +25,7 @@ if defined?(::ActionView)
         if ::AppPerfRpm::Tracer.tracing?
           opts = {
             :method => :render_partial_collection,
-            :name => @path,
-            :file => __FILE__,
-            :line_number => __LINE__
+            :name => @path
           }
 
           opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
@@ -50,9 +46,7 @@ if defined?(::ActionView)
         if ::AppPerfRpm::Tracer.tracing?
           opts = {
             :method => :render_partial,
-            :name => @options[:partial],
-            :file => __FILE__,
-            :line_number => __LINE__
+            :name => @options[:partial]
           }
 
           opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
@@ -71,9 +65,7 @@ if defined?(::ActionView)
         if ::AppPerfRpm::Tracer.tracing?
           opts = {
             :method => :render_collection,
-            :name => @path,
-            :file => __FILE__,
-            :line_number => __LINE__
+            :name => @path
           }
 
           opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
@@ -95,11 +87,7 @@ if defined?(::ActionView)
         if ::AppPerfRpm::Tracer.tracing?
           layout = nil
 
-          opts = {
-            :file => __FILE__,
-            :line_number => __LINE__
-          }
-
+          opts = {}
           opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
           opts[:source] = ::AppPerfRpm::Backtrace.source_extract
 
