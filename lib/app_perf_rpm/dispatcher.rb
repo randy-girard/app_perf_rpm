@@ -41,11 +41,11 @@ module AppPerfRpm
       if data && data.length > 0
         uri = URI(url)
         req = Net::HTTP::Post.new(uri.path, { "Content-Type" => "application/json", "Accept-Encoding" => "gzip", "User-Agent" => "gzip" })
-        req.body = {
+        req.body = Oj.dump({
           "name" => configuration.application_name,
           "host" => configuration.host,
           "data" => data
-        }.to_json
+        })
         res = Net::HTTP.start(uri.hostname, uri.port) do |http|
           http.read_timeout = 5
           http.request(req)

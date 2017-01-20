@@ -11,6 +11,7 @@ module AppPerfRpm
     end
 
     config.after_initialize do
+      AppPerfRpm.configuration.app_root = Rails.root
       AppPerfRpm.load
     end
   end

@@ -24,7 +24,7 @@ module AppPerfRpm
   end
 end
 
-if defined?(Emque::Consuming)
+if ::AppPerfRpm.configuration.instrumentation[:emque_consuming][:enabled] && defined?(Emque::Consuming)
   AppPerfRpm.logger.info "Initializing emque-consuming tracer."
 
   Emque::Consuming::Router.send(:include, AppPerfRpm::Instruments::EmqueConsuming::Router)

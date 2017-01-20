@@ -8,7 +8,7 @@ module AppPerfRpm
             require f
           rescue => e
             AppPerfRpm.logger.error "Error loading instrumentation file '#{f}' : #{e}"
-            AppPerfRpm.logger.debug "#{e.backtrace.first}"
+            AppPerfRpm.logger.error "#{e.backtrace[0..10]}"
           end
         end
 

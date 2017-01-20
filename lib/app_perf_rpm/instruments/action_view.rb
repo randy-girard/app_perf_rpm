@@ -1,4 +1,4 @@
-if defined?(::ActionView)
+if ::AppPerfRpm.configuration.instrumentation[:action_view][:enabled] && defined?(::ActionView)
   if defined?(Rails) && Rails::VERSION::MAJOR == 2
     ActionView::Partials.module_eval do
       alias :render_partial_without_trace :render_partial

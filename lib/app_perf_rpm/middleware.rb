@@ -8,11 +8,11 @@ module AppPerfRpm
 
     def call(env)
       begin
-        @response = @app.call(env)
+        @status, @headers, @response = @app.call(env)
       rescue Exception => e
         handle_exception(env, e)
       end
-      @response
+      [@status, @headers, @response]
     end
 
     def handle_exception(env, exception)

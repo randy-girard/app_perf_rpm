@@ -40,7 +40,6 @@ module AppPerfRpm
         else
           result = yield
         end
-
         result
       end
 

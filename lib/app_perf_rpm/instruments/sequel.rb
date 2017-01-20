@@ -76,7 +76,7 @@ module AppPerfRpm
   end
 end
 
-if defined?(::Sequel)
+if ::AppPerfRpm.configuration.instrumentation[:sequel][:enabled] && defined?(::Sequel)
   ::AppPerfRpm.logger.info "Initializing sequel tracer."
 
   ::Sequel::Database.send(:include, AppPerfRpm::Instruments::SequelDatabase)

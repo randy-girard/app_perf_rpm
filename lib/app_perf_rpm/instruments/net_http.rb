@@ -1,4 +1,4 @@
-if defined?(Net::HTTP)
+if ::AppPerfRpm.configuration.instrumentation[:net_http][:enabled] && defined?(Net::HTTP)
   ::AppPerfRpm.logger.info "Initializing net-http tracer."
 
   Net::HTTP.class_eval do
@@ -15,9 +15,9 @@ if defined?(Net::HTTP)
           opts[:remote_host] = addr_port
         end
 
-        trace = ::AppPerfRpm::Tracer.start_instance("net-http")
         opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
         opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+        trace = ::AppPerfRpm::Tracer.start_instance("net-http")
         response = request_without_trace(*args, &block)
         trace.finish
         opts[:status] = response.code

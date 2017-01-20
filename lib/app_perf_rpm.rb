@@ -25,7 +25,7 @@ module AppPerfRpm
     end
 
     def load
-      Oj.mimic_JSON
+      #Oj.mimic_JSON
       AppPerfRpm::Instrumentation.load
       AppPerfRpm::Monitoring.load
       @worker = ::AppPerfRpm::Worker.new
