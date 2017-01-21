@@ -21,11 +21,11 @@ module AppPerfRpm
         end
 
         {
-          :name => opts[:type],
-          :query => sanitize_sql(sql),
-          :database => db_opts[:database],
-          :host => db_opts[:host],
-          :adapter => db_opts[:adapter]
+          "name" => opts[:type],
+          "query" => sanitize_sql(sql),
+          "database" => db_opts[:database],
+          "host" => db_opts[:host],
+          "adapter" => db_opts[:adapter]
         }
       end
     end
@@ -37,8 +37,8 @@ module AppPerfRpm
         if ::AppPerfRpm::Tracer.tracing?
           begin
             opts = parse_opts(sql, options)
-            opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-            opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+            opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
+            opts["source"] = ::AppPerfRpm::Backtrace.source_extract
             ::AppPerfRpm::Tracer.trace("sequel", opts) do
               run_without_trace(sql, options)
             end
@@ -59,8 +59,8 @@ module AppPerfRpm
         if ::AppPerfRpm::Tracer.tracing?
           begin
             opts = parse_opts(sql, options)
-            opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-            opts[:source] = ::AppPerfRpm::Backtrace.source_extract(opts[:backtrace])
+            opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
+            opts["source"] = ::AppPerfRpm::Backtrace.source_extract(opts[:backtrace])
             ::AppPerfRpm::Tracer.trace("sequel", opts) do
               execute_without_trace(sql, options, &block)
             end

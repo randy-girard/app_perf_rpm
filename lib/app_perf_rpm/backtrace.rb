@@ -27,7 +27,7 @@ module AppPerfRpm
       #end
 
       def source_extract(_backtrace = Kernel.caller(0))
-        _backtrace.select {|bt| bt[/^#{::AppPerfRpm.app_root}\//] }.map do |trace|
+        _backtrace.select {|bt| bt[/^#{::AppPerfRpm.configuration.app_root.to_s}\//] }.map do |trace|
           file, line_number = extract_file_and_line_number(trace)
           source_to_hash(file, line_number)
         end
@@ -35,9 +35,9 @@ module AppPerfRpm
 
       def source_to_hash(file, line_number)
         {
-          file: clean_line(file),
-          code: source_fragment(file, line_number),
-          line_number: line_number
+          "file" => clean_line(file),
+          "code" => source_fragment(file, line_number),
+          "line_number" => line_number
         }
       end
 
@@ -45,7 +45,7 @@ module AppPerfRpm
 
       def clean_line(line)
         line
-          .sub(/#{::AppPerfRpm.app_root}\//, "[APP_PATH]/")
+          .sub(/#{::AppPerfRpm.configuration.app_root.to_s}\//, "[APP_PATH]/")
           .sub(gems_regexp, '\2 (\3) [GEM_PATH]/\4')
       end
 

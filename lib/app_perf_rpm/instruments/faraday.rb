@@ -8,15 +8,15 @@ module AppPerfRpm
           instance.finish
 
           opts = {}
-          opts[:middleware] = @builder.handlers
-          opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-          opts[:source] = ::AppPerfRpm::Backtrace.source_extract
-          opts[:protocol] = @url_prefix.scheme
-          opts[:remote_host] = @url_prefix.host
-          opts[:remote_port] = @url_prefix.port
-          opts[:service_url] = url
-          opts[:http_method] = method
-          opts[:http_status] = result.status
+          opts["middleware"] = @builder.handlers
+          opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
+          opts["source"] = ::AppPerfRpm::Backtrace.source_extract
+          opts["protocol"] = @url_prefix.scheme
+          opts["remote_host"] = @url_prefix.host
+          opts["remote_port"] = @url_prefix.port
+          opts["service_url"] = url
+          opts["http_method"] = method
+          opts["http_status"] = result.status
 
           instance.submit(opts)
 

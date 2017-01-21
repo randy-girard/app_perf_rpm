@@ -6,14 +6,14 @@ module AppPerfRpm
           action = type.to_s.split(".").last
 
           opts = {
-            :controller => topic,
-            :action => action,
-            :url => "/#{topic}/#{action}",
-            :domain => Socket.gethostname
+            "controller" => topic,
+            "action" => action,
+            "url" => "/#{topic}/#{action}",
+            "domain" => Socket.gethostname
           }
 
-          opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-          opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+          opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
+          opts["source"] = ::AppPerfRpm::Backtrace.source_extract
 
           ::AppPerfRpm::Tracer.start_trace("emque-consuming", opts) do
             route_without_trace(topic, type, message)

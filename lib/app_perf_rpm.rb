@@ -83,18 +83,6 @@ module AppPerfRpm
       AppPerfRpm.tracing_on if @previously_tracing
     end
 
-    def app_root
-      @app_root ||= if defined?(::Rails)
-        if ::Rails::VERSION::MAJOR > 2
-          Rails.root.to_s
-        else
-          RAILS_ROOT.to_s
-        end
-      else
-        ""
-      end
-    end
-
     def host
       @host ||= Socket.gethostname
     end

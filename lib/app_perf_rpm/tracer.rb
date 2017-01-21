@@ -30,7 +30,7 @@ module AppPerfRpm
       end
 
       def start_trace(layer, opts = {})
-        trace_id = opts.delete(:trace_id)
+        trace_id = opts.delete("trace_id")
         if trace_id || should_trace?
           self.trace_id = trace_id || generate_trace_id
           result = trace(layer, opts) do
@@ -73,12 +73,12 @@ module AppPerfRpm
               if @times[key]
                 @times[key] = Time.now.to_f - @times[key].to_f
                 traces << {
-                  :duration => @times[key].to_f,
-                  :class => tp.defined_class,
-                  :method => tp.method_id,
-                  :backtrace => backtrace,
-                  :line => ::AppPerfRpm::Backtrace.send(:clean_line, tp.path),
-                  :line_number => tp.lineno
+                  "duration "=> @times[key].to_f,
+                  "class" => tp.defined_class,
+                  "method" => tp.method_id,
+                  "backtrace" => backtrace,
+                  "line" => ::AppPerfRpm::Backtrace.send(:clean_line, tp.path),
+                  "line_number" => tp.lineno
                 }
               end
             end

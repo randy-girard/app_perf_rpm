@@ -25,13 +25,13 @@ module AppPerfRpm
                 sanitized_sql = sanitize_sql(sql)
 
                 opts = {
-                  :adapter => "postgresql",
-                  :query => sanitized_sql,
-                  :name => name
+                  "adapter" => "postgresql",
+                  "query" => sanitized_sql,
+                  "name" => name
                 }
 
-                opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-                opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+                opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
+                opts["source"] = ::AppPerfRpm::Backtrace.source_extract
 
                 AppPerfRpm::Tracer.trace('activerecord', opts) do
                   exec_query_without_trace(sql, name, binds)
@@ -50,13 +50,13 @@ module AppPerfRpm
                 sanitized_sql = sanitize_sql(sql)
 
                 opts = {
-                  :adapter => "postgresql",
-                  :sql => sanitized_sql,
-                  :name => name
+                  "adapter" => "postgresql",
+                  "query" => sanitized_sql,
+                  "name" => name
                 }
 
-                opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-                opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+                opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
+                opts["source"] = ::AppPerfRpm::Backtrace.source_extract
 
                 AppPerfRpm::Tracer.trace('activerecord', opts) do
                   exec_delete_without_trace(sql, name, binds)
@@ -75,13 +75,13 @@ module AppPerfRpm
                 sanitized_sql = sanitize_sql(sql)
 
                 opts = {
-                  :adapter => "postgresql",
-                  :sql => sanitized_sql,
-                  :name => name
+                  "adapter" => "postgresql",
+                  "query" => sanitized_sql,
+                  "name" => name
                 }
 
-                opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-                opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+                opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
+                opts["source"] = ::AppPerfRpm::Backtrace.source_extract
 
                 AppPerfRpm::Tracer.trace('activerecord', opts) do
                   exec_insert_without_trace(sql, name, binds, *args)
@@ -95,12 +95,12 @@ module AppPerfRpm
           def begin_db_transaction_with_trace
             if ::AppPerfRpm::Tracer.tracing?
               opts = {
-                :adapter => "postgresql",
-                :sql => "BEGIN"
+                "adapter" => "postgresql",
+                "query" => "BEGIN"
               }
 
-              opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-              opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+              opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
+              opts["source"] = ::AppPerfRpm::Backtrace.source_extract
 
               AppPerfRpm::Tracer.trace('activerecord', opts) do
                 begin_db_transaction_without_trace

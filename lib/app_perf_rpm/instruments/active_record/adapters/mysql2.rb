@@ -25,13 +25,13 @@ module AppPerfRpm
                 sanitized_sql = sanitize_sql(sql)
 
                 opts = {
-                  :adapter => "mysql2",
-                  :query => sanitized_sql,
-                  :name => name
+                  "adapter" => "mysql2",
+                  "query" => sanitized_sql,
+                  "name" => name
                 }
 
-                opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-                opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+                opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
+                opts["source"] = ::AppPerfRpm::Backtrace.source_extract
 
                 AppPerfRpm::Tracer.trace('activerecord', opts || {}) do
                   execute_without_trace(sql, name)

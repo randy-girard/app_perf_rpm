@@ -15,13 +15,13 @@ module AppPerfRpm
           sanitized_sql = sanitize_sql(base_sql + values.join( ',' ) + post_sql)
 
           opts = {
-            :adapter => ::ActiveRecord::Base.connection_config[:adapter],
-            :query => sanitized_sql,
-            :name => self.class.name
+            "adapter" => ::ActiveRecord::Base.connection_config[:adapter],
+            "query" => sanitized_sql,
+            "name" => self.class.name
           }
 
-          opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-          opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+          opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
+          opts["source"] = ::AppPerfRpm::Backtrace.source_extract
 
           AppPerfRpm::Tracer.trace('activerecord', opts) do
             insert_many_without_trace(sql, values, *args)

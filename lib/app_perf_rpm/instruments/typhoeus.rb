@@ -10,11 +10,11 @@ module AppPerfRpm
           uri = URI(response.effective_url)
 
           opts = {}
-          opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-          opts[:source] = ::AppPerfRpm::Backtrace.source_extract
-          opts[:http_status] = response.code
-          opts[:remote_url] = uri.to_s
-          opts[:http_method] = options[:method]
+          opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
+          opts["source"] = ::AppPerfRpm::Backtrace.source_extract
+          opts["http_status"] = response.code
+          opts["remote_url"] = uri.to_s
+          opts["http_method"] = options[:method]
           instance.submit(opts)
           response
         else
@@ -26,10 +26,10 @@ module AppPerfRpm
     module TyphoeusHydra
       def run_with_trace
         opts = {}
-        opts[:method] = :hydra
-        opts[:queued_requests] = queued_requests.count
-        opts[:max_concurrency] = max_concurrency
-        ::AppPerfRpm::Tracer.trace(:typhoeus, opts) do
+        opts["method"] = :hydra
+        opts["queued_requests"] = queued_requests.count
+        opts["max_concurrency"] = max_concurrency
+        ::AppPerfRpm::Tracer.trace("typhoeus", opts) do
           run_without_trace
         end
       end

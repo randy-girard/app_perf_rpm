@@ -5,12 +5,12 @@ module AppPerfRpm
         def dispatch_with_trace
           if ::AppPerfRpm::Tracer.tracing?
             opts = {
-              :controller => self.class.to_s,
-              :action => env["PATH_INFO"]
+              "controller" => self.class.to_s,
+              "action" => env["PATH_INFO"]
             }
 
-            opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-            opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+            opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
+            opts["source"] = ::AppPerfRpm::Backtrace.source_extract
 
             ::AppPerfRpm::Tracer.trace("sinatra", opts) do
               dispatch_without_trace
@@ -30,13 +30,13 @@ module AppPerfRpm
           if ::AppPerfRpm::Tracer.tracing?
             name = data
             opts = {}
-            opts[:engine] = engine
-            opts[:name] = name
-            opts[:type] = :render
-            opts[:file] = __FILE__
-            opts[:line_number] = __LINE__
-            opts[:backtrace] = ::AppPerfRpm::Backtrace.backtrace
-            opts[:source] = ::AppPerfRpm::Backtrace.source_extract
+            opts["engine"] = engine
+            opts["name"] = name
+            opts["type"] = "render"
+            opts["file"] = __FILE__
+            opts["line_number"] = __LINE__
+            opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
+            opts["source"] = ::AppPerfRpm::Backtrace.source_extract
 
             ::AppPerfRpm::Tracer.trace("sinatra", opts) do
               render_without_trace(engine, data, options, locals, &block)
