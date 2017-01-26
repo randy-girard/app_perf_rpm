@@ -47,7 +47,7 @@ module AppPerfRpm
           "data" => data
         })
         res = Net::HTTP.start(uri.hostname, uri.port) do |http|
-          http.read_timeout = 5
+          http.read_timeout = 30
           http.request(req)
         end
         data.clear

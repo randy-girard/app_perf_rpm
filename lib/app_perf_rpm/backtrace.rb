@@ -27,7 +27,7 @@ module AppPerfRpm
       #end
 
       def source_extract(_backtrace = Kernel.caller(0))
-        _backtrace.select {|bt| bt[/^#{::AppPerfRpm.configuration.app_root.to_s}\//] }.map do |trace|
+        Array(_backtrace).select {|bt| bt[/^#{::AppPerfRpm.configuration.app_root.to_s}\//] }.map do |trace|
           file, line_number = extract_file_and_line_number(trace)
           source_to_hash(file, line_number)
         end
