@@ -41,17 +41,25 @@ module AppPerfRpm
       if data && data.length > 0
         uri = URI(url)
         req = Net::HTTP::Post.new(uri.path, { "Content-Type" => "application/json", "Accept-Encoding" => "gzip", "User-Agent" => "gzip" })
-        req.body = Oj.dump({
-          "name" => configuration.application_name,
-          "host" => configuration.host,
-          "data" => data
-        })
+        req.body = compress_body(data)
+        req.content_type = "application/octet-stream"
         res = Net::HTTP.start(uri.hostname, uri.port) do |http|
           http.read_timeout = 30
           http.request(req)
         end
         data.clear
       end
+    end
+
+    def compress_body(data)
+      body = Oj.dump({
+        "name" => configuration.application_name,
+        "host" => configuration.host,
+        "data" => data
+      })
+
+      compressed_body = Zlib::Deflate.deflate(body, Zlib::DEFAULT_COMPRESSION)
+      Base64.encode64(compressed_body)
     end
 
     def drain(queue)
