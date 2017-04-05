@@ -12,6 +12,7 @@ module AppPerfRpm
   require 'app_perf_rpm/instrumentation'
   require 'app_perf_rpm/monitoring'
   require 'app_perf_rpm/rails'
+  require 'app_perf_rpm/introspector'
 
   class << self
     attr_writer :configuration
@@ -26,13 +27,15 @@ module AppPerfRpm
 
     def load
       #Oj.mimic_JSON
-      AppPerfRpm::Instrumentation.load
-      AppPerfRpm::Monitoring.load
-      @worker = ::AppPerfRpm::Worker.new
+      unless disable_agent?
+        AppPerfRpm::Instrumentation.load
+        AppPerfRpm::Monitoring.load
+        @worker = ::AppPerfRpm::Worker.new
 
-      if @worker.start
-        @worker_running = true
-        AppPerfRpm.tracing_on
+        if @worker.start
+          @worker_running = true
+          AppPerfRpm.tracing_on
+        end
       end
     end
 
@@ -102,5 +105,13 @@ module AppPerfRpm
         return up.to_s
       end
     end
+
+    def disable_agent?
+      if !Introspector.agentable?
+        return false
+      end
+      configuration.agent_disabled
+    end
+
   end
 end
