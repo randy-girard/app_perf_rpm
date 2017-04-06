@@ -11,7 +11,7 @@ describe AppPerfRpm do
       expect(::AppPerfRpm).to receive(:store).with(["second", 1, 0.0, 0.0, {}]).once
       expect(::AppPerfRpm).to receive(:store).with(["first", 1, 0.0, 0.0, {}]).once
 
-      subject.start_trace("first", { :trace_id => 1 }) do
+      subject.start_trace("first", { "trace_id" => 1 }) do
         subject.trace("second", {}) do
           subject.trace("third", {}) do
 
@@ -39,7 +39,7 @@ describe AppPerfRpm do
       expect(::AppPerfRpm).to receive(:store).with(["second", 1, 0.0, 0.0, {}]).once
       expect(::AppPerfRpm).to receive(:store).with(["first", 1, 0.0, 0.0, {}]).once
 
-      subject.start_trace("first", { :trace_id => 1 }) do
+      subject.start_trace("first", { "trace_id" => 1 }) do
         subject.trace("second", {}) do
           subject.trace("third", {}) do
 
