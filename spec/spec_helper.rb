@@ -7,5 +7,5 @@ SimpleCov.start
 require 'app_perf_rpm'
 
 RSpec.configure do |config|
-
+  config.order = :random
 end
