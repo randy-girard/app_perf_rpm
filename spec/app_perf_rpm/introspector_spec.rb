@@ -4,7 +4,7 @@ describe AppPerfRpm do
   subject { AppPerfRpm::Introspector.agentable? } 
   context "AppPerfRpm::Introspector.agentable?" do
 
-    let(:runner) { AppPerfRpm::Introspector::VALID_RUNNERS.sample }
+    let(:runner) { AppPerfRpm::Introspector::VALID_RUNNERS.sample.to_s }
 
     context "no valid runner" do
       it "returns false" do

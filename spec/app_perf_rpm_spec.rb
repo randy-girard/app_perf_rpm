@@ -90,7 +90,7 @@ describe AppPerfRpm do
     context "using IntroSpector" do 
       it "invalid runner" do
         hide_const("Puma")
-        expect(subject).to eq(false)
+        expect(subject).to eq(true)
       end
       it "valid runner" do
         expect(AppPerfRpm.configuration).to receive(:agent_disabled).and_return(false)
