@@ -5,6 +5,10 @@ module AppPerfRpm
     class << self
 
       def agentable?
+        if raking?
+          AppPerfRpm.logger.info("Detected rake, not initializing agent")
+          return false
+        end
         AppPerfRpm.logger.info("Detecting runner...")
         VALID_RUNNERS.each do |runner| 
           if const_defined?(runner)
@@ -14,6 +18,10 @@ module AppPerfRpm
         end
         AppPerfRpm.logger.info("No valid runner detected!")
         false
+      end
+
+      def raking?
+        (File.basename($0) =~ /\Arake/) == 0
       end
 
       def const_defined?(string_const)

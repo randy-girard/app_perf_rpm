@@ -108,7 +108,7 @@ module AppPerfRpm
 
     def disable_agent?
       if !Introspector.agentable?
-        return false
+        return true
       end
       configuration.agent_disabled
     end

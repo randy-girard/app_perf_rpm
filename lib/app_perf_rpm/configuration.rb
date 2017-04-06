@@ -29,7 +29,7 @@ module AppPerfRpm
         self.sample_rate ||= 10 # Percentage of request to sample
         self.sample_threshold ||= 0 # Minimum amount of duration to sample
         self.dispatch_interval ||= 60 # In seconds
-        self.agent_disabled ||= default_if_blank(ENV["APP_PERF_AGENT_DISABLED"], false )
+        self.agent_disabled ||= default_if_blank(ENV["APP_PERF_AGENT_DISABLED"], false)
         self.instrumentation = {
           :sequel          => { :enabled => true },
           :net_http        => { :enabled => true },
