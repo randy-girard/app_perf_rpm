@@ -4,16 +4,18 @@ module AppPerfRpm
 
     # TODO: Why this isn't working with the initializer?
     initializer "app_perf.initialize" do |app|
-      app.middleware.use AppPerfRpm::Middleware
+      unless AppPerfRpm.disable_agent?
+        app.middleware.use AppPerfRpm::Middleware
 
-      AppPerfRpm.logger.info "Initializing rack middleware tracer."
-      app.middleware.insert 0, AppPerfRpm::Instruments::Rack
-    end
+        AppPerfRpm.logger.info "Initializing rack middleware tracer."
+        app.middleware.insert 0, AppPerfRpm::Instruments::Rack
+      end
 
-    config.after_initialize do
-      AppPerfRpm.configuration.app_root = Rails.root
-      AppPerfRpm.configuration.reload
-      AppPerfRpm.load
+      config.after_initialize do
+        AppPerfRpm.configuration.app_root = Rails.root
+        AppPerfRpm.configuration.reload
+        AppPerfRpm.load
+      end
     end
   end
 end
