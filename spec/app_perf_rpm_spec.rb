@@ -51,7 +51,7 @@ describe AppPerfRpm do
     end
   end
 
-  describe ".load" do 
+  describe ".load" do
     context "agent classes and worker" do
       it "should not load" do
         worker = double('AppPerfRpm::Worker', start: {})
@@ -71,23 +71,28 @@ describe AppPerfRpm do
     end
   end
 
-  describe ".disable_agent?" do 
-    subject { ::AppPerfRpm.disable_agent? } 
+  describe ".disable_agent?" do
+    subject { ::AppPerfRpm.disable_agent? }
 
     context "using configuration" do
       it "and disabled" do
         expect(AppPerfRpm.configuration).to receive(:agent_disabled).and_return(true)
-        expect(AppPerfRpm::Introspector).to receive(:agentable?).and_return(true)
+        expect(AppPerfRpm::Introspector).to receive(:agentable?).never
         expect(subject).to eq(true)
       end
-      it "and defaults" do 
+      it "and defaults" do
         expect(AppPerfRpm.configuration).to receive(:agent_disabled).and_return(false)
         expect(AppPerfRpm::Introspector).to receive(:agentable?).and_return(true)
         expect(subject).to eq(false)
       end
+      it "else" do
+        expect(AppPerfRpm.configuration).to receive(:agent_disabled).and_return(false)
+        expect(AppPerfRpm::Introspector).to receive(:agentable?).and_return(false)
+        expect(subject).to eq(true)
+      end
     end
 
-    context "using IntroSpector" do 
+    context "using IntroSpector" do
       it "invalid runner" do
         hide_const("Puma")
         expect(subject).to eq(true)
@@ -99,5 +104,5 @@ describe AppPerfRpm do
       end
     end
 
-  end #describe 
+  end #describe
 end

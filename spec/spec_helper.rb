@@ -5,7 +5,8 @@ require 'simplecov'
 SimpleCov.start
 
 require 'app_perf_rpm'
-#AppPerfRpm.logger.level = Logger::DEBUG #enable when needed
+AppPerfRpm.configuration.agent_disabled = true
+AppPerfRpm.logger.level = Logger::WARN #enable when needed
 
 RSpec.configure do |config|
   config.order = :random

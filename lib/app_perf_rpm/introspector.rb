@@ -1,4 +1,4 @@
-module AppPerfRpm 
+module AppPerfRpm
   class Introspector
 
     VALID_RUNNERS = [
@@ -19,7 +19,7 @@ module AppPerfRpm
           return false
         end
         AppPerfRpm.logger.info("Detecting runner...")
-        VALID_RUNNERS.each do |runner| 
+        VALID_RUNNERS.each do |runner|
           if const_defined?(runner.to_s)
             AppPerfRpm.logger.info("#{runner} detected. You're valid")
             return true
