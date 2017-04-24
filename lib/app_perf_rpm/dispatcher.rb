@@ -1,3 +1,5 @@
+require 'net/http'
+
 module AppPerfRpm
   class Dispatcher
     def initialize
