@@ -98,6 +98,7 @@ describe AppPerfRpm do
         expect(subject).to eq(true)
       end
       it "valid runner" do
+        expect(AppPerfRpm::Introspector).to receive(:rspecing?).and_return(false)
         expect(AppPerfRpm.configuration).to receive(:agent_disabled).and_return(false)
         stub_const("Puma",{})
         expect(subject).to eq(false)

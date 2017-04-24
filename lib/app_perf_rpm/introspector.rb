@@ -14,7 +14,7 @@ module AppPerfRpm
     class << self
 
       def agentable?
-        if raking?
+        if raking? || rspecing?
           AppPerfRpm.logger.info("Detected rake, not initializing agent")
           return false
         end
@@ -27,6 +27,10 @@ module AppPerfRpm
         end
         AppPerfRpm.logger.info("No valid runner detected!")
         false
+      end
+
+      def rspecing?
+        (File.basename($0) =~ /\Arspec/) == 0
       end
 
       def raking?
