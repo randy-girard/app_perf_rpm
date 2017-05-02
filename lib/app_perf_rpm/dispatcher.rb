@@ -42,10 +42,15 @@ module AppPerfRpm
     def dispatch_events(data)
       if data && data.length > 0
         uri = URI(url)
+
+        sock = Net::HTTP.new(uri.host, uri.port)
+        sock.use_ssl = configuration.ssl
+
         req = Net::HTTP::Post.new(uri.path, { "Content-Type" => "application/json", "Accept-Encoding" => "gzip", "User-Agent" => "gzip" })
         req.body = compress_body(data)
         req.content_type = "application/octet-stream"
-        res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+
+        res = sock.start do |http|
           http.read_timeout = 30
           http.request(req)
         end
@@ -69,11 +74,9 @@ module AppPerfRpm
     end
 
     def url
-      ssl = configuration.ssl ? "https" : "http"
       host = configuration.host
-      port = configuration.port
       license_key = configuration.license_key
-      @url ||= "#{ssl}://#{host}:#{port}/api/listener/2/#{license_key}"
+      @url ||= "#{host}/api/listener/2/#{license_key}"
     end
   end
 end

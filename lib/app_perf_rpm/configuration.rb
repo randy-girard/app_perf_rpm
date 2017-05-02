@@ -21,8 +21,7 @@ module AppPerfRpm
     def reload
       ::AppPerfRpm.mutex.synchronize do
         self.app_root = app_root ? Pathname.new(app_root.to_s) : nil
-        self.host ||= default_if_blank(ENV["APP_PERF_HOST"], "localhost")
-        self.port ||= default_if_blank(ENV["APP_PERF_PORT"], 5000)
+        self.host ||= default_if_blank(ENV["APP_PERF_HOST"], "http://localhost:5000")
         self.ssl ||= false
         self.license_key ||= default_if_blank(ENV["APP_PERF_LICENSE_KEY"], nil)
         self.application_name ||= "Default"
