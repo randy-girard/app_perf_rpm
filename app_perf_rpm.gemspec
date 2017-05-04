@@ -24,4 +24,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "simplecov"
   s.add_runtime_dependency "oj"
   s.add_runtime_dependency "sys-cpu"
+  s.add_runtime_dependency "sys-filesystem"
 end
