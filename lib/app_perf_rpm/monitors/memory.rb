@@ -14,10 +14,6 @@ module AppPerfRpm
       def unit
         "kb"
       end
-
-      def interval
-        60
-      end
     end
   end
 end

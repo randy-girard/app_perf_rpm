@@ -15,10 +15,6 @@ module AppPerfRpm
       def unit
         "%"
       end
-
-      def interval
-        60
-      end
     end
   end
 end

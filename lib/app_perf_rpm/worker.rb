@@ -31,10 +31,11 @@ module AppPerfRpm
         @dispatcher.reset
 
         loop do
-          @monitoring.tick
+          @monitoring.log
           if @dispatcher.ready?
             @dispatcher.dispatch
             @dispatcher.reset
+            @monitoring.reset
           end
           sleep 5
         end

@@ -17,35 +17,26 @@ module AppPerfRpm
         raise NotImplementedError
       end
 
-      def interval
-        raise NotImplementedError
-      end
-
       def unit
         raise NotImplementedError
       end
 
-      def tick
-        if ready?
-          log
-          reset
-        end
+      def reset
+        @logged = false
       end
 
       def log
-        ::AppPerfRpm.store(event)
+        if !logged?
+          ::AppPerfRpm.store(event)
+        end
+      end
+
+      def logged?
+        !!@logged
       end
 
       def event
         ["metric", Time.now.to_f, { "name" => name, "value" => value, "unit" => unit }]
-      end
-
-      def reset
-        @start_time = Time.now
-      end
-
-      def ready?
-        Time.now > @start_time + interval
       end
     end
   end

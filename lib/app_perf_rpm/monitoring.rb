@@ -20,8 +20,12 @@ module AppPerfRpm
         .map(&:new)
     end
 
-    def tick
-      monitors.each(&:tick)
+    def reset
+      monitors.each(&:reset)
+    end
+
+    def log
+      monitors.each(&:log)
     end
   end
 end
