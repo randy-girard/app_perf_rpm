@@ -36,7 +36,15 @@ module AppPerfRpm
       end
 
       def event
-        ["metric", Time.now.to_f, { "name" => name, "value" => value, "unit" => unit }]
+        [
+          "metric",
+          AppPerfRpm.round_time(Time.now, 60).to_f,
+          {
+            "name" => name,
+            "value" => value,
+            "unit" => unit
+          }
+        ]
       end
     end
   end

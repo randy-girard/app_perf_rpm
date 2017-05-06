@@ -16,7 +16,7 @@ describe AppPerfRpm do
     it "returns rounded time" do
       actual = Time.parse("2016-01-01 12:00:30")
       expected = Time.parse("2016-01-01 12:01:00")
-      result = Time.parse(subject.round_time(actual, 60))
+      result = Time.parse(subject.round_time(actual, 60).to_s)
       expect(result).to eq(expected)
     end
   end

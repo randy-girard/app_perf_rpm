@@ -100,9 +100,9 @@ module AppPerfRpm
       difference_up = up - t
 
       if (difference_down < difference_up)
-        return down.to_s
+        return down
       else
-        return up.to_s
+        return up
       end
     end
 

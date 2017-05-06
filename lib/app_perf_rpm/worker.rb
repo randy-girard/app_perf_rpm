@@ -31,13 +31,14 @@ module AppPerfRpm
         @dispatcher.reset
 
         loop do
+          start = Time.now
           @monitoring.log
           if @dispatcher.ready?
             @dispatcher.dispatch
             @dispatcher.reset
             @monitoring.reset
           end
-          sleep 5
+          sleep (start + 5 - Time.now)
         end
       end
       @worker_thread.abort_on_exception = true
