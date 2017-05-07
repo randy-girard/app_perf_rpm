@@ -106,6 +106,10 @@ module AppPerfRpm
       end
     end
 
+    def floor_time(t, sec = 1)
+      Time.at((t.to_f / sec).floor * sec)
+    end
+
     def disable_agent?
       if configuration.agent_disabled
         true
