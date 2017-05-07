@@ -22,29 +22,38 @@ module AppPerfRpm
       end
 
       def reset
-        @logged = false
+        @data = []
       end
 
-      def log
-        if !logged?
-          ::AppPerfRpm.store(event)
+      def record
+        @data << [Time.now, value]
+      end
+
+      def queue_for_dispatching
+        events = @data
+          .group_by { |datum| AppPerfRpm.floor_time(datum[0], 60) }
+          .map { |k, v| [k, v.map(&:last)] }
+          .to_h
+
+        events.each_pair do |timestamp, values|
+          sum = values.inject(0){ |sum, x| sum + x }
+          average_value = 0
+          average_value = sum / values.size if values.size.to_i > 0
+          ::AppPerfRpm.store([
+              "metric",
+              timestamp.to_f,
+              {
+                "name" => name,
+                "value" => average_value,
+                "unit" => unit
+              }
+            ]
+          )
         end
       end
 
       def logged?
         !!@logged
-      end
-
-      def event
-        [
-          "metric",
-          AppPerfRpm.floor_time(Time.now, 60).to_f,
-          {
-            "name" => name,
-            "value" => value,
-            "unit" => unit
-          }
-        ]
       end
     end
   end

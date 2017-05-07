@@ -24,8 +24,12 @@ module AppPerfRpm
       monitors.each(&:reset)
     end
 
-    def log
-      monitors.each(&:log)
+    def record
+      monitors.each(&:record)
+    end
+
+    def queue_for_dispatching
+      monitors.each(&:queue_for_dispatching)
     end
   end
 end
