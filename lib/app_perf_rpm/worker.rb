@@ -33,7 +33,7 @@ module AppPerfRpm
         loop do
           start = Time.now
           @monitoring.record
-          if @dispatcher.ready?
+          if @dispatcher.ready? || @monitoring.ready?
             @monitoring.queue_for_dispatching
             @dispatcher.dispatch
             @dispatcher.reset

@@ -29,6 +29,10 @@ module AppPerfRpm
         @data << [Time.now, value]
       end
 
+      def ready?
+        @data.present?
+      end
+
       def queue_for_dispatching
         events = @data
           .group_by { |datum| AppPerfRpm.floor_time(datum[0], 60) }

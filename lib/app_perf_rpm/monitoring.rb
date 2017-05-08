@@ -24,6 +24,10 @@ module AppPerfRpm
       monitors.each(&:reset)
     end
 
+    def ready?
+      monitors.any?(&:ready?)
+    end
+
     def record
       monitors.each(&:record)
     end
