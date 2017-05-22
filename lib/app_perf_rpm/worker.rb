@@ -39,7 +39,9 @@ module AppPerfRpm
             @dispatcher.reset
             @monitoring.reset
           end
-          sleep (start + 5 - Time.now)
+          sleep_for = (start + 15 - Time.now)
+          sleep_for = 1 if sleep_for < 1
+          sleep sleep_for
         end
       end
       @worker_thread.abort_on_exception = true
