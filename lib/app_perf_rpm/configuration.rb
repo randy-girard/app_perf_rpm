@@ -30,12 +30,19 @@ module AppPerfRpm
         self.dispatch_interval ||= 60 # In seconds
         self.agent_disabled ||= default_if_blank(ENV["APP_PERF_AGENT_DISABLED"], false)
         self.instrumentation = {
-          :sequel          => { :enabled => true },
-          :net_http        => { :enabled => true },
-          :emque_consuming => { :enabled => true },
-          :action_view     => { :enabled => true },
-          :typhoeus        => { :enabled => true },
-          :faraday         => { :enabled => true }
+          :rack                 => { :enabled => true, :backtrace => false, :trace_middleware => true },
+          :active_record        => { :enabled => true, :backtrace => false },
+          :active_record_import => { :enabled => true, :backtrace => false },
+          :action_view          => { :enabled => true, :backtrace => false },
+          :action_controller    => { :enabled => true, :backtrace => false },
+          :emque_consuming      => { :enabled => true, :backtrace => false },
+          :redis                => { :enabled => true, :backtrace => false },
+          :sequel               => { :enabled => true, :backtrace => false },
+          :sidekiq              => { :enabled => true, :backtrace => false },
+          :sinatra              => { :enabled => true, :backtrace => false },
+          :net_http             => { :enabled => true, :backtrace => false },
+          :typhoeus             => { :enabled => true, :backtrace => false },
+          :faraday              => { :enabled => true, :backtrace => false }
         }
       end
     end

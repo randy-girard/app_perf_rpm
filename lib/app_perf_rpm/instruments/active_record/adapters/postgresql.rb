@@ -22,18 +22,14 @@ module AppPerfRpm
               if ignore_trace?(name)
                 exec_query_without_trace(sql, name, binds)
               else
-                sanitized_sql = sanitize_sql(sql)
+                sanitized_sql = sanitize_sql(sql, :postgres)
 
-                opts = {
-                  "adapter" => "postgresql",
-                  "query" => sanitized_sql,
-                  "name" => name
-                }
-
-                opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-                opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-
-                AppPerfRpm::Tracer.trace('activerecord', opts) do
+                AppPerfRpm::Tracer.trace('activerecord') do |span|
+                  span.options = {
+                    "adapter" => "postgresql",
+                    "query" => sanitized_sql,
+                    "name" => name
+                  }
                   exec_query_without_trace(sql, name, binds)
                 end
               end
@@ -49,16 +45,12 @@ module AppPerfRpm
               else
                 sanitized_sql = sanitize_sql(sql)
 
-                opts = {
-                  "adapter" => "postgresql",
-                  "query" => sanitized_sql,
-                  "name" => name
-                }
-
-                opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-                opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-
-                AppPerfRpm::Tracer.trace('activerecord', opts) do
+                AppPerfRpm::Tracer.trace('activerecord') do |span|
+                  span.options = {
+                    "adapter" => "postgresql",
+                    "query" => sanitized_sql,
+                    "name" => name
+                  }
                   exec_delete_without_trace(sql, name, binds)
                 end
               end
@@ -72,18 +64,15 @@ module AppPerfRpm
               if ignore_trace?(name)
                 exec_insert_without_trace(sql, name, binds, *args)
               else
-                sanitized_sql = sanitize_sql(sql)
+                sanitized_sql = sanitize_sql(sql, :postgres)
 
-                opts = {
-                  "adapter" => "postgresql",
-                  "query" => sanitized_sql,
-                  "name" => name
-                }
+                AppPerfRpm::Tracer.trace('activerecord') do |span|
+                  span.options = {
+                    "adapter" => "postgresql",
+                    "query" => sanitized_sql,
+                    "name" => name
+                  }
 
-                opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-                opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-
-                AppPerfRpm::Tracer.trace('activerecord', opts) do
                   exec_insert_without_trace(sql, name, binds, *args)
                 end
               end
@@ -94,15 +83,12 @@ module AppPerfRpm
 
           def begin_db_transaction_with_trace
             if ::AppPerfRpm::Tracer.tracing?
-              opts = {
-                "adapter" => "postgresql",
-                "query" => "BEGIN"
-              }
+              AppPerfRpm::Tracer.trace('activerecord') do |span|
+                span.options = {
+                  "adapter" => "postgresql",
+                  "query" => "BEGIN"
+                }
 
-              opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-              opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-
-              AppPerfRpm::Tracer.trace('activerecord', opts) do
                 begin_db_transaction_without_trace
               end
             else

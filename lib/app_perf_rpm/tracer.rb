@@ -17,7 +17,7 @@ module AppPerfRpm
         !Thread.current[:trace_id].nil?
       end
 
-      def start_instance(layer, opts = {})
+      def start_span(layer, opts = {})
         Instance.new(layer, opts)
       end
 
@@ -30,29 +30,34 @@ module AppPerfRpm
       end
 
       def start_trace(layer, opts = {})
+        start = Time.now.to_f
+
         trace_id = opts.delete("trace_id")
         if trace_id || should_trace?
           self.trace_id = trace_id || generate_trace_id
-          result = trace(layer, opts) do
-            yield
+          result = trace(layer, opts) do |span|
+            yield(span)
           end
           self.trace_id = nil
         else
           result = yield
         end
-        result
+
+        return result, (Time.now.to_f - start) * 1000
       end
 
       def trace(layer, opts = {})
         result = nil
 
         if tracing?
-          start = Time.now.to_f
-          result = yield
-          duration = (Time.now.to_f - start) * 1000
-
-          event = [layer, self.trace_id, start, duration, opts]
-          ::AppPerfRpm.store(event)
+          span = Span.new
+          span.layer = layer
+          span.trace_id = self.trace_id
+          span.started_at = Time.now.to_f
+          result = yield(span)
+          span.ended_at = Time.now.to_f
+          span.options.merge!(opts)
+          ::AppPerfRpm.store(span)
         else
           result = yield
         end
@@ -105,20 +110,21 @@ module AppPerfRpm
         attr_accessor :layer, :opts, :start, :duration
 
         def initialize(layer, opts = {})
-          self.layer = layer
-          self.opts = opts
-          self.start = Time.now.to_f
+          @span = Span.new
+          @span.layer = layer
+          @span.options = opts
+          @span.started_at = Time.now.to_f
         end
 
         def finish(opts = {})
-          self.opts.merge!(opts)
-          self.duration = (Time.now.to_f - start) * 1000
+          @span.options.merge!(opts)
+          @span.ended_at = Time.now.to_f
         end
 
         def submit(opts = {})
           if ::AppPerfRpm::Tracer.tracing?
-            self.opts.merge!(opts)
-            ::AppPerfRpm.store([layer, trace_id, start, duration, opts])
+            @span.options.merge!(opts)
+            ::AppPerfRpm.store(@span)
           end
         end
 

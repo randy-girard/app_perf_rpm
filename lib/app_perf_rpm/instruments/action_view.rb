@@ -12,7 +12,12 @@ if ::AppPerfRpm.configuration.instrumentation[:action_view][:enabled] && defined
           opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
           opts["source"] = ::AppPerfRpm::Backtrace.source_extract
 
-          AppPerfRpm::Tracer.trace("actionview", opts) do
+          AppPerfRpm::Tracer.trace("actionview", opts) do |span|
+            span.controller = @_request.path_parameters['controller']
+            span.action = @_request.path_parameters['action']
+            span.backtrace = ::AppPerfRpm::Backtrace.backtrace
+            span.source = ::AppPerfRpm::Backtrace.source_extract
+
             render_partial_without_trace(options)
           end
         else
@@ -23,15 +28,14 @@ if ::AppPerfRpm.configuration.instrumentation[:action_view][:enabled] && defined
       alias :render_partial_collection_without_trace :render_partial_collection
       def render_partial_collection(options = {})
         if ::AppPerfRpm::Tracer.tracing?
-          opts = {
-            "method" => "render_partial_collection",
-            "name" => @path
-          }
+          AppPerfRpm::Tracer.trace("actionview") do |span|
+            span.backtrace = ::AppPerfRpm::Backtrace.backtrace
+            span.source = ::AppPerfRpm::Backtrace.source_extract
+            span.options = {
+              "method" => "render_partial_collection",
+              "name" => @path
+            }
 
-          opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-          opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-
-          AppPerfRpm::Tracer.trace("actionview", opts) do
             render_partial_collection_without_trace(options)
           end
         else
@@ -44,15 +48,14 @@ if ::AppPerfRpm.configuration.instrumentation[:action_view][:enabled] && defined
       alias :render_partial_without_trace :render_partial
       def render_partial
         if ::AppPerfRpm::Tracer.tracing?
-          opts = {
-            "method" => "render_partial",
-            "name" => @options[:partial]
-          }
+          AppPerfRpm::Tracer.trace("actionview") do |span|
+            span.backtrace = ::AppPerfRpm::Backtrace.backtrace
+            span.source = ::AppPerfRpm::Backtrace.source_extract
+            span.options = {
+              "method" => "render_partial",
+              "name" => @options[:partial]
+            }
 
-          opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-          opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-
-          AppPerfRpm::Tracer.trace("actionview", opts) do
             render_partial_without_trace
           end
         else
@@ -63,15 +66,12 @@ if ::AppPerfRpm.configuration.instrumentation[:action_view][:enabled] && defined
       alias :render_collection_without_trace :render_collection
       def render_collection
         if ::AppPerfRpm::Tracer.tracing?
-          opts = {
-            "method" => "render_collection",
-            "name" => @path
-          }
+          AppPerfRpm::Tracer.trace("actionview") do |span|
+            span.options = {
+              "method" => "render_collection",
+              "name" => @path
+            }
 
-          opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-          opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-
-          AppPerfRpm::Tracer.trace("actionview", opts) do
             render_collection_without_trace
           end
         else
@@ -87,10 +87,6 @@ if ::AppPerfRpm.configuration.instrumentation[:action_view][:enabled] && defined
         if ::AppPerfRpm::Tracer.tracing?
           layout = nil
 
-          opts = {}
-          opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-          opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-
           if path
             if method(:find_layout).arity == 3
               # Rails 5
@@ -100,21 +96,24 @@ if ::AppPerfRpm.configuration.instrumentation[:action_view][:enabled] && defined
               layout = find_layout(path, locals.keys)
             end
 
-            opts[:path] = path
+            @path = path
           end
 
-          if layout
-            opts["method"] = "render_with_layout"
-            opts["name"] = layout.identifier
-            opts["layout"] = layout
-            AppPerfRpm::Tracer.trace("actionview", opts) do
-              render_with_layout_without_trace(path, locals, *args, &block)
+          AppPerfRpm::Tracer.trace("actionview") do |span|
+            if layout
+              span.options = {
+                "method" => "render_with_layout",
+                "name" => layout.identifier,
+                "path" => @path,
+                "layout" => layout
+              }
+            else
+              span.options = {
+                "method" => "render_without_layout",
+                "path" => @path
+              }
             end
-          else
-            opts["method"] = "render_without_layout"
-            AppPerfRpm::Tracer.trace("actionview", opts) do
-              render_with_layout_without_trace(path, locals, *args, &block)
-            end
+            render_with_layout_without_trace(path, locals, *args, &block)
           end
         else
           render_with_layout_without_trace(path, locals, *args, &block)

@@ -3,22 +3,19 @@ module AppPerfRpm
     module FaradayConnection
       def run_request_with_trace(method, url, body, headers, &block)
         if ::AppPerfRpm.tracing?
-          instance = ::AppPerfRpm::Tracer.start_instance("faraday")
+          span = ::AppPerfRpm::Tracer.start_span("faraday")
           result = run_request_without_trace(method, url, body, headers, &block)
-          instance.finish
-
-          opts = {}
-          opts["middleware"] = @builder.handlers
-          opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-          opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-          opts["protocol"] = @url_prefix.scheme
-          opts["remote_host"] = @url_prefix.host
-          opts["remote_port"] = @url_prefix.port
-          opts["service_url"] = url
-          opts["http_method"] = method
-          opts["http_status"] = result.status
-
-          instance.submit(opts)
+          span.finish
+          span.options = {
+            "middleware" => @builder.handlers,
+            "protocol" => @url_prefix.scheme,
+            "remote_host" => @url_prefix.host,
+            "remote_port" => @url_prefix.port,
+            "service_url" => url,
+            "http_method" => method,
+            "http_status" => result.status
+          }
+          span.submit(opts)
 
           result
         else

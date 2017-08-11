@@ -5,6 +5,7 @@ module AppPerfRpm
     def initialize
       @start_time = Time.now
       @queue = Queue.new
+      @aggregator = Aggregator.new
     end
 
     def add_event(event)
@@ -27,8 +28,10 @@ module AppPerfRpm
 
     def dispatch
       begin
-        events = drain(@queue)
-        dispatch_events(events.dup)
+        spans = drain(@queue)
+        metrics = []#@aggregator.aggregate(spans)
+
+        dispatch_events(spans.map(&:to_a) + metrics)
       rescue => ex
         ::AppPerfRpm.logger.error "#{ex.inspect}"
         ::AppPerfRpm.logger.error "#{ex.backtrace.inspect}"
@@ -61,7 +64,7 @@ module AppPerfRpm
     def compress_body(data)
       body = Oj.dump({
         "name" => configuration.application_name,
-        "host" => configuration.host,
+        "host" => AppPerfRpm.host,
         "data" => data
       })
 

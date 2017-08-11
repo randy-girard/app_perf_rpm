@@ -3,19 +3,19 @@ module AppPerfRpm
     module TyphoeusRequest
       def run_with_trace
         if ::AppPerfRpm.tracing?
-          instance = ::AppPerfRpm::Tracer.start_instance("typhoeus")
+          span = ::AppPerfRpm::Tracer.start_span("typhoeus")
           response = run_without_trace
-          instance.finish
+          span.finish
 
           uri = URI(response.effective_url)
 
-          opts = {}
-          opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-          opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-          opts["http_status"] = response.code
-          opts["remote_url"] = uri.to_s
-          opts["http_method"] = options[:method]
-          instance.submit(opts)
+          span.options = {
+            "http_status" => response.code,
+            "remote_url" => uri.to_s,
+            "http_method" => options[:method]
+          }
+          span.submit(opts)
+
           response
         else
           run_without_trace
@@ -25,11 +25,12 @@ module AppPerfRpm
 
     module TyphoeusHydra
       def run_with_trace
-        opts = {}
-        opts["method"] = :hydra
-        opts["queued_requests"] = queued_requests.count
-        opts["max_concurrency"] = max_concurrency
-        ::AppPerfRpm::Tracer.trace("typhoeus", opts) do
+        ::AppPerfRpm::Tracer.trace("typhoeus") do |span|
+          span.options = {
+            "method" => :hydra,
+            "queued_requests" => queued_requests.count,
+            "max_concurrency" => max_concurrency
+          }
           run_without_trace
         end
       end

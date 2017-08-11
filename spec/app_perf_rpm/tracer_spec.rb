@@ -4,12 +4,61 @@ describe AppPerfRpm do
 
   subject { AppPerfRpm::Tracer }
 
+  class MockWorker
+    attr_accessor :spans
+
+    def initialize
+      @spans = []
+    end
+    def save(span)
+      @spans << span
+    end
+  end
+
+=begin
+  it "does stuff" do
+    worker = MockWorker.new
+    AppPerfRpm.instance_variable_set(:@worker_running, true)
+    AppPerfRpm.instance_variable_set(:@worker, worker)
+    AppPerfRpm.instance_variable_set(:@tracing, true)
+
+    subject.start_trace("1_first", { "trace_id" => 1 }) do
+      subject.trace("1_second", {}) do
+        subject.trace("1_third", {}) do
+          sleep 1
+        end
+      end
+    end
+    subject.start_trace("2_first", { "trace_id" => 2 }) do
+      subject.trace("2_second", {}) do
+        subject.trace("2_third", {}) do
+          sleep 2
+        end
+      end
+    end
+
+    #worker.spans.group_by(&:trace_id).map{|a| puts a.last.inspect }
+    traces = worker.spans.group_by(&:trace_id).map{|a| AppPerfRpm::Span.arrange(a.last) }
+
+    traces
+      .group_by {|span| AppPerfRpm.floor_time(Time.at(span.started_at), 1) }
+      .map {|traces| traces.last }
+      .flatten
+      .map {|traces| traces.to_spans }
+      .flatten
+      .map {|span| puts span.inspect; span }
+      .each {|s| puts s.to_a.inspect }
+
+  end
+=end
   context "trace header is set" do
     it "should trace with that trace key" do
       allow(Time).to receive(:now) { 0 }
-      expect(::AppPerfRpm).to receive(:store).with(["third", 1, 0.0, 0.0, {}]).once
-      expect(::AppPerfRpm).to receive(:store).with(["second", 1, 0.0, 0.0, {}]).once
-      expect(::AppPerfRpm).to receive(:store).with(["first", 1, 0.0, 0.0, {}]).once
+      worker = MockWorker.new
+      allow(::AppPerfRpm::Backtrace).to receive(:source_extract) { "source" }
+      AppPerfRpm.instance_variable_set(:@worker_running, true)
+      AppPerfRpm.instance_variable_set(:@worker, worker)
+      AppPerfRpm.instance_variable_set(:@tracing, true)
 
       subject.start_trace("first", { "trace_id" => 1 }) do
         subject.trace("second", {}) do
@@ -18,6 +67,12 @@ describe AppPerfRpm do
           end
         end
       end
+
+      expect(worker.spans.map(&:to_a)).to eql([
+        ["third", 1, 0.0, 0.0, {"type"=>"web", "source"=>"source"}],
+        ["second", 1, 0.0, 0.0, {"type"=>"web", "source"=>"source"}],
+        ["first", 1, 0.0, 0.0, {"type"=>"web", "source"=>"source"}]
+      ])
     end
   end
 
@@ -35,9 +90,11 @@ describe AppPerfRpm do
 
     it "should trace through all traces" do
       allow(Time).to receive(:now) { 0 }
-      expect(::AppPerfRpm).to receive(:store).with(["third", 1, 0.0, 0.0, {}]).once
-      expect(::AppPerfRpm).to receive(:store).with(["second", 1, 0.0, 0.0, {}]).once
-      expect(::AppPerfRpm).to receive(:store).with(["first", 1, 0.0, 0.0, {}]).once
+      worker = MockWorker.new
+      allow(::AppPerfRpm::Backtrace).to receive(:source_extract) { "source" }
+      AppPerfRpm.instance_variable_set(:@worker_running, true)
+      AppPerfRpm.instance_variable_set(:@worker, worker)
+      AppPerfRpm.instance_variable_set(:@tracing, true)
 
       subject.start_trace("first", { "trace_id" => 1 }) do
         subject.trace("second", {}) do
@@ -46,6 +103,12 @@ describe AppPerfRpm do
           end
         end
       end
+
+      expect(worker.spans.map(&:to_a)).to eql([
+        ["third", 1, 0.0, 0.0, {"type"=>"web", "source"=>"source"}],
+        ["second", 1, 0.0, 0.0, {"type"=>"web", "source"=>"source"}],
+        ["first", 1, 0.0, 0.0, {"type"=>"web", "source"=>"source"}]
+      ])
     end
   end
 
@@ -69,9 +132,11 @@ describe AppPerfRpm do
       expect(subject).to receive(:random_percentage).once { 51 }
       allow(Time).to receive(:now) { 0 }
       expect(Digest::SHA1).to receive(:hexdigest) { 1 }
-      expect(::AppPerfRpm).to receive(:store).with(["third", 1, 0.0, 0.0, {}]).once
-      expect(::AppPerfRpm).to receive(:store).with(["second", 1, 0.0, 0.0, {}]).once
-      expect(::AppPerfRpm).to receive(:store).with(["first", 1, 0.0, 0.0, {}]).once
+      worker = MockWorker.new
+      allow(::AppPerfRpm::Backtrace).to receive(:source_extract) { "source" }
+      AppPerfRpm.instance_variable_set(:@worker_running, true)
+      AppPerfRpm.instance_variable_set(:@worker, worker)
+      AppPerfRpm.instance_variable_set(:@tracing, true)
 
       subject.start_trace("first", {}) do
         subject.trace("second", {}) do
@@ -86,6 +151,12 @@ describe AppPerfRpm do
           end
         end
       end
+
+      expect(worker.spans.map(&:to_a)).to eql([
+        ["third", 1, 0.0, 0.0, {"type"=>"web", "source"=>"source"}],
+        ["second", 1, 0.0, 0.0, {"type"=>"web", "source"=>"source"}],
+        ["first", 1, 0.0, 0.0, {"type"=>"web", "source"=>"source"}]
+      ])
     end
   end
 end

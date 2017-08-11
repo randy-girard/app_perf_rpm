@@ -4,26 +4,25 @@ if ::AppPerfRpm.configuration.instrumentation[:net_http][:enabled] && defined?(N
   Net::HTTP.class_eval do
     def request_with_trace(*args, &block)
       if ::AppPerfRpm::Tracer.tracing?
-        opts = {}
+        span = ::AppPerfRpm::Tracer.start_span("net-http")
 
         if args.length && args[0]
           req = args[0]
-
-          opts["protocol"] = use_ssl? ? "https" : "http"
-          opts["path"] = req.path
-          opts["method"] = req.method
-          opts["remote_host"] = addr_port
+          span.options["protocol"] = use_ssl? ? "https" : "http"
+          span.options["path"] = req.path
+          span.options["method"] = req.method
+          span.options["remote_host"] = addr_port
         end
 
-        opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-        opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-        trace = ::AppPerfRpm::Tracer.start_instance("net-http")
         response = request_without_trace(*args, &block)
-        trace.finish
-        opts[:status] = response.code
+
+        span.finish
+        span.options["status"] = response.code
+
         if (response.code.to_i >= 300 || response.code.to_i <= 308) && response.header["Location"]
-          opts["location"] = response.header["Location"]
+          span.options["location"] = response.header["Location"]
         end
+
         trace.submit(opts)
       else
         response = request_without_trace(*args, &block)

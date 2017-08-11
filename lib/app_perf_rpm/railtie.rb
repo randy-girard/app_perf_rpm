@@ -7,8 +7,16 @@ module AppPerfRpm
       unless AppPerfRpm.disable_agent?
         app.middleware.use AppPerfRpm::Middleware
 
-        AppPerfRpm.logger.info "Initializing rack middleware tracer."
-        app.middleware.insert 0, AppPerfRpm::Instruments::Rack
+        if ::AppPerfRpm.configuration.instrumentation[:rack][:enabled]
+          AppPerfRpm.logger.info "Initializing rack tracer."
+          app.middleware.insert 0, AppPerfRpm::Instruments::Rack
+
+          if AppPerfRpm.configuration.instrumentation[:rack][:trace_middleware]
+            AppPerfRpm.logger.info "Initializing rack middleware tracer."
+            require 'app_perf_rpm/instruments/rack_middleware'
+            app.middleware.insert 1, AppPerfRpm::Instruments::RackMiddleware
+          end
+        end
       end
 
       config.after_initialize do

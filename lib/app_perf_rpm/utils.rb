@@ -1,8 +1,9 @@
 module AppPerfRpm
   module Utils
-    def sanitize_sql(sql)
-      regexp = Regexp.new('(\'[\s\S][^\']*\'|\d*\.\d+|\d+|NULL)', Regexp::IGNORECASE)
-      sql.gsub(regexp, '?')
+    REGEXP ||= Regexp.new('(\'[\s\S][^\']*\'|\d*\.\d+|\d+|NULL)')
+
+    def sanitize_sql(sql, adapter)
+      sql.gsub(REGEXP, '?')
     end
   end
 end

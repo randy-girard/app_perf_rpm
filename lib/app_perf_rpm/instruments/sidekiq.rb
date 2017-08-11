@@ -2,20 +2,18 @@ module AppPerfRpm
   class SidekiqServer
     def call(*args)
       worker, msg, queue = args
-      opts = {
-        "type" => "job",
-        "queue" => queue,
-        "job_name" => worker.class.to_s,
-        "controller" => "Sidekiq_#{queue}",
-        "action" =>  msg['wrapped'],
-        "url" => "/sidekiq/#{queue}/#{msg['wrapped']}",
-        "domain" => Socket.gethostname
-      }
 
-      opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-      opts["source"] = ::AppPerfRpm::Backtrace.source_extract
+      result = AppPerfRpm::Tracer.start_trace("sidekiq-worker") do |span|
+        span.type = "job"
+        span.controller = "Sidekiq_#{queue}"
+        span.action = msg["wrapped"]
+        span.url = "/sidekiq/#{queue}/#{msg['wrapped']}"
+        span.domain = Socket.gethostname
+        span.options = {
+          "job_name" => worker.class.to_s,
+          "queue" => queue
+        }
 
-      result = AppPerfRpm::Tracer.start_trace("sidekiq-worker", opts) do
         yield
       end
 
@@ -27,22 +25,20 @@ module AppPerfRpm
     def call(*args)
       if ::AppPerfRpm::Tracer.tracing?
         worker, msg, queue = args
-        opts = {}
-        opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-        opts["source"] = ::AppPerfRpm::Backtrace.source_extract
 
-        result = AppPerfRpm::Tracer.trace("sidekiq-client", opts) do
+        result = AppPerfRpm::Tracer.trace("sidekiq-client") do |span|
           yield
         end
       else
-        reuslt = yield
+        result = yield
       end
       result
     end
   end
 end
 
-if defined?(::Sidekiq)
+if ::AppPerfRpm.configuration.instrumentation[:sidekiq][:enabled] &&
+  defined?(::Sidekiq)
   AppPerfRpm.logger.info "Initializing sidekiq tracer."
 
   ::Sidekiq.configure_server do |config|

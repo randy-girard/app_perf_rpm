@@ -3,10 +3,7 @@ module AppPerf
     module Redis
       def call_with_trace(command, &block)
         if ::AppPerfRpm::Tracer.tracing?
-          opts = {}
-          opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-          opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-          ::AppPerfRpm::Tracer.trace("redis", opts) do
+          ::AppPerfRpm::Tracer.trace("redis") do |span|
             call_without_trace(command, &block)
           end
         else
@@ -16,10 +13,7 @@ module AppPerf
 
       def call_pipeline_with_trace(pipeline)
         if ::AppPerfRpm::Tracer.tracing?
-          opts = {}
-          opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-          opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-          ::AppPerfRpm::Tracer.trace("redis", opts) do
+          ::AppPerfRpm::Tracer.trace("redis") do |span|
             call_pipeline_without_trace(pipeline)
           end
         else
@@ -30,7 +24,8 @@ module AppPerf
   end
 end
 
-if defined?(::Redis)
+if ::AppPerfRpm.configuration.instrumentation[:redis][:enabled] &&
+  defined?(::Redis)
   ::AppPerfRpm.logger.info "Initializing redis tracer."
 
   ::Redis::Client.send(:include, ::AppPerf::Instruments::Redis)

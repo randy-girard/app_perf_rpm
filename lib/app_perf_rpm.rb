@@ -3,6 +3,8 @@ require 'oj'
 module AppPerfRpm
   require 'app_perf_rpm/logger'
   require 'app_perf_rpm/configuration'
+  require 'app_perf_rpm/span'
+  require 'app_perf_rpm/aggregator'
   require 'app_perf_rpm/dispatcher'
   require 'app_perf_rpm/worker'
   require 'app_perf_rpm/backtrace'
@@ -10,7 +12,6 @@ module AppPerfRpm
   require 'app_perf_rpm/utils'
   require 'app_perf_rpm/middleware'
   require 'app_perf_rpm/instrumentation'
-  require 'app_perf_rpm/monitoring'
   require 'app_perf_rpm/rails'
   require 'app_perf_rpm/introspector'
 
@@ -29,7 +30,6 @@ module AppPerfRpm
       #Oj.mimic_JSON
       unless disable_agent?
         AppPerfRpm::Instrumentation.load
-        AppPerfRpm::Monitoring.load
         @worker = ::AppPerfRpm::Worker.new
 
         if @worker.start

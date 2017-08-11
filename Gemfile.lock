@@ -1,10 +1,8 @@
 PATH
   remote: .
   specs:
-    app_perf_rpm (0.0.1)
-      oj
-      sys-cpu
-      sys-filesystem
+    app_perf_rpm (0.0.2)
+      oj (= 3.3.2)
 
 GEM
   remote: https://rubygems.org/
@@ -12,10 +10,9 @@ GEM
     coderay (1.1.1)
     diff-lcs (1.2.5)
     docile (1.1.5)
-    ffi (1.9.18)
     json (2.0.2)
     method_source (0.8.2)
-    oj (3.0.5)
+    oj (3.3.2)
     pry (0.10.4)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
@@ -40,20 +37,16 @@ GEM
       simplecov-html (~> 0.10.0)
     simplecov-html (0.10.0)
     slop (3.6.0)
-    sys-cpu (0.7.2)
-      ffi
-    sys-filesystem (1.1.7)
-      ffi
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   app_perf_rpm!
-  pry
-  rake
-  rspec
-  simplecov
+  pry (= 0.10.4)
+  rake (= 12.0.0)
+  rspec (= 3.5.0)
+  simplecov (= 0.12.0)
 
 BUNDLED WITH
-   1.14.6
+   1.15.3

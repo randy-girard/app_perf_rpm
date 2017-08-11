@@ -4,15 +4,10 @@ module AppPerfRpm
       module Base
         def dispatch_with_trace
           if ::AppPerfRpm::Tracer.tracing?
-            opts = {
-              "controller" => self.class.to_s,
-              "action" => env["PATH_INFO"]
-            }
+            ::AppPerfRpm::Tracer.trace("sinatra") do |span|
+              span.controller = self.class.to_s
+              span.action = env["PATH_INFO"]
 
-            opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-            opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-
-            ::AppPerfRpm::Tracer.trace("sinatra", opts) do
               dispatch_without_trace
             end
           else
@@ -29,16 +24,16 @@ module AppPerfRpm
         def render_with_trace(engine, data, options = {}, locals = {}, &block)
           if ::AppPerfRpm::Tracer.tracing?
             name = data
-            opts = {}
-            opts["engine"] = engine
-            opts["name"] = name
-            opts["type"] = "render"
-            opts["file"] = __FILE__
-            opts["line_number"] = __LINE__
-            opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-            opts["source"] = ::AppPerfRpm::Backtrace.source_extract
 
-            ::AppPerfRpm::Tracer.trace("sinatra", opts) do
+            ::AppPerfRpm::Tracer.trace("sinatra") do |span|
+              span.options = {
+                "engine" => engine,
+                "name" => name,
+                "type" => "render",
+                "file" => __FILE__,
+                "line_number" => __LINE__
+              }
+
               render_without_trace(engine, data, options, locals, &block)
             end
           else
@@ -50,7 +45,8 @@ module AppPerfRpm
   end
 end
 
-if defined?(::Sinatra)
+if ::AppPerfRpm.configuration.instrumentation[:sinatra][:enabled] &&
+  defined?(::Sinatra)
   ::AppPerfRpm.logger.info "Initializing sinatra tracer."
 
   ::Sinatra::Base.use AppPerfRpm::Instruments::Rack

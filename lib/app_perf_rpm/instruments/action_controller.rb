@@ -3,15 +3,10 @@ module AppPerfRpm
     module ActionController
       def process_action_with_trace(method_name, *args)
         if ::AppPerfRpm::Tracer.tracing?
-          opts = {
-            "controller" => self.class.name,
-            "action" => self.action_name
-          }
+          AppPerfRpm::Tracer.trace('actioncontroller') do |span|
+            span.controller = self.class.name
+            span.action = self.action_name
 
-          opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-          opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-
-          AppPerfRpm::Tracer.trace('actioncontroller', opts) do
             process_action_without_trace(method_name, *args)
           end
         else
@@ -21,15 +16,10 @@ module AppPerfRpm
 
       def perform_action_with_trace(*arguments)
         if ::AppPerfRpm::Tracer.tracing?
-          opts = {
-            "controller"  => @_request.path_parameters['controller'],
-            "action"      => @_request.path_parameters['action']
-          }
+          AppPerfRpm::Tracer.trace('actioncontroller') do |span|
+            span.controller = @_request.path_parameters['controller']
+            span.action = @_request.path_parameters['action']
 
-          opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-          opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-
-          AppPerfRpm::Tracer.trace('actioncontroller', opts) do
             perform_action_without_trace(*arguments)
           end
         else
@@ -40,7 +30,8 @@ module AppPerfRpm
   end
 end
 
-if defined?(::ActionController)
+if ::AppPerfRpm.configuration.instrumentation[:action_controller][:enabled] &&
+  defined?(::ActionController)
   AppPerfRpm.logger.info "Initializing actioncontroller tracer."
 
   ::ActionController::Base.send(

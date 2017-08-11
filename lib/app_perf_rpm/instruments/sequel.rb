@@ -36,10 +36,9 @@ module AppPerfRpm
       def run_with_trace(sql, options = ::Sequel::OPTS)
         if ::AppPerfRpm::Tracer.tracing?
           begin
-            opts = parse_opts(sql, options)
-            opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-            opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-            ::AppPerfRpm::Tracer.trace("sequel", opts) do
+            ::AppPerfRpm::Tracer.trace("sequel") do |span|
+              span.options = parse_opts(sql, options)
+
               run_without_trace(sql, options)
             end
           rescue => e
@@ -58,10 +57,9 @@ module AppPerfRpm
       def execute_with_trace(sql, options = ::Sequel::OPTS, &block)
         if ::AppPerfRpm::Tracer.tracing?
           begin
-            opts = parse_opts(sql, options)
-            opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-            opts["source"] = ::AppPerfRpm::Backtrace.source_extract(opts[:backtrace])
-            ::AppPerfRpm::Tracer.trace("sequel", opts) do
+            ::AppPerfRpm::Tracer.trace("sequel", opts) do |span|
+              span.options = parse_opts(sql, options)
+
               execute_without_trace(sql, options, &block)
             end
           rescue => e
