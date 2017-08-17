@@ -30,7 +30,7 @@ module AppPerfRpm
         self.dispatch_interval ||= 60 # In seconds
         self.agent_disabled ||= default_if_blank(ENV["APP_PERF_AGENT_DISABLED"], false)
         self.instrumentation = {
-          :rack                 => { :enabled => true, :backtrace => false, :trace_middleware => true },
+          :rack                 => { :enabled => true, :backtrace => false, :trace_middleware => false },
           :active_record        => { :enabled => true, :backtrace => false },
           :active_record_import => { :enabled => true, :backtrace => false },
           :action_view          => { :enabled => true, :backtrace => false },

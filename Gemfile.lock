@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    app_perf_rpm (0.0.2)
+    app_perf_rpm (0.0.3)
       oj (= 3.3.2)
 
 GEM

@@ -25,6 +25,7 @@ module AppPerfRpm
             span.type = "web"
             span.domain = req.host
             span.url = req.path
+            span.options["class"] = self.class.name
 
             @status, @headers, @response = @app.call(env)
           end
