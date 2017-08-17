@@ -40,7 +40,8 @@ module AppPerfRpm
           end
           self.trace_id = nil
         else
-          result = yield
+          span = Span.new
+          result = yield(span)
         end
 
         return result, (Time.now.to_f - start) * 1000
