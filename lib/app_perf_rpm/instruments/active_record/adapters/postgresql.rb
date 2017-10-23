@@ -17,10 +17,10 @@ module AppPerfRpm
               name == 'ActiveRecord::SchemaMigration Load'
           end
 
-          def exec_query_with_trace(sql, name = nil, binds = [])
+          def exec_query_with_trace(sql, name = nil, binds = [], opts = {})
             if ::AppPerfRpm::Tracer.tracing?
               if ignore_trace?(name)
-                exec_query_without_trace(sql, name, binds)
+                exec_query_without_trace(sql, name, binds, opts)
               else
                 sanitized_sql = sanitize_sql(sql, :postgres)
 
@@ -30,11 +30,11 @@ module AppPerfRpm
                     "query" => sanitized_sql,
                     "name" => name
                   }
-                  exec_query_without_trace(sql, name, binds)
+                  exec_query_without_trace(sql, name, binds, opts)
                 end
               end
             else
-              exec_query_without_trace(sql, name, binds)
+              exec_query_without_trace(sql, name, binds, *args)
             end
           end
 
