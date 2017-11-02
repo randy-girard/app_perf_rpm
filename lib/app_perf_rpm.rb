@@ -3,55 +3,84 @@ require 'oj'
 module AppPerfRpm
   require 'app_perf_rpm/logger'
   require 'app_perf_rpm/configuration'
-  require 'app_perf_rpm/span'
-  require 'app_perf_rpm/aggregator'
-  require 'app_perf_rpm/dispatcher'
-  require 'app_perf_rpm/worker'
   require 'app_perf_rpm/backtrace'
+
+  require 'app_perf_rpm/reporters/json_client'
+  require 'app_perf_rpm/reporters/null_client'
+
+  require 'app_perf_rpm/tracing/buffer'
+  require 'app_perf_rpm/tracing/carrier'
+  require 'app_perf_rpm/tracing/collector'
+  require 'app_perf_rpm/tracing/endpoint'
+  require 'app_perf_rpm/tracing/trace_id'
+  require 'app_perf_rpm/tracing/span_context'
+  require 'app_perf_rpm/tracing/span'
+  require 'app_perf_rpm/tracing/managed_span'
+  require 'app_perf_rpm/tracing/tracer'
+  require 'app_perf_rpm/tracing/managed_tracer'
+  require 'app_perf_rpm/tracing/thread_span_stack'
+
   require 'app_perf_rpm/tracer'
   require 'app_perf_rpm/utils'
-  require 'app_perf_rpm/middleware'
   require 'app_perf_rpm/instrumentation'
   require 'app_perf_rpm/rails'
   require 'app_perf_rpm/introspector'
 
-  class << self
-    attr_writer :configuration
+  TRACE_CONTEXT_KEY = 'AppPerf-Trace-Context'
 
-    def configuration
-      @configuration ||= Configuration.new
+  class << self
+
+    attr_writer :config
+
+    def config
+      @config ||= Configuration.new
     end
 
     def configure
-      yield(configuration)
+      yield(config)
     end
 
     def load
       #Oj.mimic_JSON
       unless disable_agent?
         AppPerfRpm::Instrumentation.load
-        @worker = ::AppPerfRpm::Worker.new
-
-        if @worker.start
-          @worker_running = true
-          AppPerfRpm.tracing_on
-        end
+        AppPerfRpm.tracing_on
       end
-    end
-
-    def worker
-      @worker
     end
 
     def mutex
       @mutex ||= Mutex.new
     end
 
-    def store(event)
-      if @worker_running && tracing?
-        @worker.save(event)
-      end
-      event
+    def endpoint
+      @endpoint ||= AppPerfRpm::Tracing::Endpoint.local_endpoint(config.application_name)
+    end
+
+    def collector
+      @collector ||= AppPerfRpm::Tracing::Collector.new(endpoint)
+    end
+
+    def url
+      @url ||= "#{config.host}/api/listener/3/#{config.license_key}"
+    end
+
+    def sender
+      @sender ||= AppPerfRpm::Reporters::JsonClient.new(
+        url: url,
+        collector: collector,
+        flush_interval: config.flush_interval
+      )
+    end
+
+    def tracer
+      @tracer ||= AppPerfRpm::Tracing::ManagedTracer.new(
+        AppPerfRpm::Tracing::Tracer.build(
+          :service_name => config.application_name,
+          :sender => sender,
+          :collector => collector
+        ),
+        AppPerfRpm::Tracing::ThreadSpanStack.new
+      )
     end
 
     def tracing_on
@@ -73,7 +102,7 @@ module AppPerfRpm
     end
 
     def tracing?
-      @tracing
+      !!@tracing
     end
 
     def without_tracing
@@ -111,13 +140,17 @@ module AppPerfRpm
     end
 
     def disable_agent?
-      if configuration.agent_disabled
+      if config.agent_disabled
         true
       elsif Introspector.agentable?
         false
       else
         true
       end
+    end
+
+    def now
+      Process.clock_gettime(Process::CLOCK_REALTIME)
     end
 
   end

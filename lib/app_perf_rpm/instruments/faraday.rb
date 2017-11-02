@@ -3,30 +3,38 @@ module AppPerfRpm
     module FaradayConnection
       def run_request_with_trace(method, url, body, headers, &block)
         if ::AppPerfRpm.tracing?
-          span = ::AppPerfRpm::Tracer.start_span("faraday")
+          span = ::AppPerfRpm.tracer.start_span("faraday", tags: {
+            "component" => "Faraday",
+            "span.kind" => "client"
+          })
           result = run_request_without_trace(method, url, body, headers, &block)
+          span.set_tag "middleware", @builder.handlers
+          span.set_tag "peer.hostname", @url_prefix.host
+          span.set_tag "peer.port", @url_prefix.port
+          span.set_tag "http.protocol", @url_prefix.scheme
+          span.set_tag "http.url", url
+          span.set_tag "http.method", method
+          span.set_tag "http.status_code", result.status
+          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
           span.finish
-          span.options = {
-            "middleware" => @builder.handlers,
-            "protocol" => @url_prefix.scheme,
-            "remote_host" => @url_prefix.host,
-            "remote_port" => @url_prefix.port,
-            "service_url" => url,
-            "http_method" => method,
-            "http_status" => result.status
-          }
-          span.submit(opts)
-
-          result
         else
           run_request_without_trace(method, url, body, headers, &block)
         end
+      rescue Exception => e
+        if span
+          span.set_tag('error', true)
+          span.log_error(e)
+        end
+        raise
+      ensure
+        span.finish if span
       end
     end
   end
 end
 
-if ::AppPerfRpm.configuration.instrumentation[:faraday][:enabled] && defined?(::Faraday)
+if ::AppPerfRpm.config.instrumentation[:faraday][:enabled] && defined?(::Faraday)
   ::AppPerfRpm.logger.info "Initializing faraday tracer."
 
   ::Faraday::Connection.send(:include, AppPerfRpm::Instruments::FaradayConnection)

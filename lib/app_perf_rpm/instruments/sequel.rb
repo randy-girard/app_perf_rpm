@@ -21,11 +21,13 @@ module AppPerfRpm
         end
 
         {
-          "name" => opts[:type],
-          "query" => sanitize_sql(sql),
-          "database" => db_opts[:database],
-          "host" => db_opts[:host],
-          "adapter" => db_opts[:adapter]
+          "db.type" => opts[:type],
+          "db.statement" => sanitize_sql(sql),
+          "db.instance" => db_opts[:database],
+          "db.user" => db_opts[:user],
+          "db.vendor" => db_opts[:adapter],
+          "peer.address" => db_opts[:host],
+          "peer.port" => db_opts[:port]
         }
       end
     end
@@ -35,19 +37,22 @@ module AppPerfRpm
 
       def run_with_trace(sql, options = ::Sequel::OPTS)
         if ::AppPerfRpm::Tracer.tracing?
-          begin
-            ::AppPerfRpm::Tracer.trace("sequel") do |span|
-              span.options = parse_opts(sql, options)
-
-              run_without_trace(sql, options)
-            end
-          rescue => e
-            ::AppPerfRpm.logger.error e.inspect
-            raise
-          end
-        else
-          run_without_trace(sql, options)
+          span = ::AppPerfRpm.tracer.start_span("sequel", tags: parse_opts(sql, options))
+          span.set_tag "component", "Sequel"
+          span.set_tag "span.kind", "client"
+          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
         end
+
+        run_without_trace(sql, options)
+      rescue Exception => e
+        if span
+          span.set_tag('error', true)
+          span.log_error(e)
+        end
+        raise
+      ensure
+        span.finish if span
       end
     end
 
@@ -56,25 +61,28 @@ module AppPerfRpm
 
       def execute_with_trace(sql, options = ::Sequel::OPTS, &block)
         if ::AppPerfRpm::Tracer.tracing?
-          begin
-            ::AppPerfRpm::Tracer.trace("sequel", opts) do |span|
-              span.options = parse_opts(sql, options)
-
-              execute_without_trace(sql, options, &block)
-            end
-          rescue => e
-            ::AppPerfRpm.logger.error e.inspect
-            raise
-          end
-        else
-          execute_without_trace(sql, options, &block)
+          span = ::AppPerfRpm.tracer.start_span("sequel", tags: parse_opts(sql, options))
+          span.set_tag "component", "Sequel"
+          span.set_tag "span.kind", "client"
+          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
         end
+
+        execute_without_trace(sql, options, &block)
+      rescue Exception => e
+        if span
+          span.set_tag('error', true)
+          span.log_error(e)
+        end
+        raise
+      ensure
+        span.finish if span
       end
     end
   end
 end
 
-if ::AppPerfRpm.configuration.instrumentation[:sequel][:enabled] && defined?(::Sequel)
+if ::AppPerfRpm.config.instrumentation[:sequel][:enabled] && defined?(::Sequel)
   ::AppPerfRpm.logger.info "Initializing sequel tracer."
 
   ::Sequel::Database.send(:include, AppPerfRpm::Instruments::SequelDatabase)

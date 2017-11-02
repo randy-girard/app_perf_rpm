@@ -54,17 +54,12 @@ describe AppPerfRpm do
   describe ".load" do
     context "agent classes and worker" do
       it "should not load" do
-        worker = double('AppPerfRpm::Worker', start: {})
         expect(::AppPerfRpm).to receive(:disable_agent?).and_return(true)
-        expect(worker).to_not receive(:start)
 
         ::AppPerfRpm.load
       end
       it "should load" do
-        worker = double('AppPerfRpm::Worker', start: {})
         expect(::AppPerfRpm).to receive(:disable_agent?).and_return(false)
-        expect(::AppPerfRpm::Worker).to receive(:new).and_return(worker)
-        expect(worker).to receive(:start)
 
         ::AppPerfRpm.load
       end
@@ -76,17 +71,17 @@ describe AppPerfRpm do
 
     context "using configuration" do
       it "and disabled" do
-        expect(AppPerfRpm.configuration).to receive(:agent_disabled).and_return(true)
+        expect(AppPerfRpm.config).to receive(:agent_disabled).and_return(true)
         expect(AppPerfRpm::Introspector).to receive(:agentable?).never
         expect(subject).to eq(true)
       end
       it "and defaults" do
-        expect(AppPerfRpm.configuration).to receive(:agent_disabled).and_return(false)
+        expect(AppPerfRpm.config).to receive(:agent_disabled).and_return(false)
         expect(AppPerfRpm::Introspector).to receive(:agentable?).and_return(true)
         expect(subject).to eq(false)
       end
       it "else" do
-        expect(AppPerfRpm.configuration).to receive(:agent_disabled).and_return(false)
+        expect(AppPerfRpm.config).to receive(:agent_disabled).and_return(false)
         expect(AppPerfRpm::Introspector).to receive(:agentable?).and_return(false)
         expect(subject).to eq(true)
       end
@@ -99,7 +94,7 @@ describe AppPerfRpm do
       end
       it "valid runner" do
         expect(AppPerfRpm::Introspector).to receive(:rspecing?).and_return(false)
-        expect(AppPerfRpm.configuration).to receive(:agent_disabled).and_return(false)
+        expect(AppPerfRpm.config).to receive(:agent_disabled).and_return(false)
         stub_const("Puma",{})
         expect(subject).to eq(false)
       end

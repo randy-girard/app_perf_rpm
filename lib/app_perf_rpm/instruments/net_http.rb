@@ -1,29 +1,35 @@
-if ::AppPerfRpm.configuration.instrumentation[:net_http][:enabled] && defined?(Net::HTTP)
+if ::AppPerfRpm.config.instrumentation[:net_http][:enabled] && defined?(Net::HTTP)
   ::AppPerfRpm.logger.info "Initializing net-http tracer."
 
   Net::HTTP.class_eval do
     def request_with_trace(*args, &block)
       if ::AppPerfRpm::Tracer.tracing?
-        span = ::AppPerfRpm::Tracer.start_span("net-http")
+        span = ::AppPerfRpm.tracer.start_span("net-http", {
+          "component" => "NetHttp",
+          "span.kind" => "client"
+        })
 
         if args.length && args[0]
           req = args[0]
-          span.options["protocol"] = use_ssl? ? "https" : "http"
-          span.options["path"] = req.path
-          span.options["method"] = req.method
-          span.options["remote_host"] = addr_port
+          AppPerfRpm.tracer.inject(span.context, OpenTracing::FORMAT_RACK, req)
+          span.set_tag "http.protocol", (use_ssl? ? "https" : "http")
+          span.set_tag "http.url", req.path
+          span.set_tag "http.method", req.method
+          span.set_tag "peer.hostname", addr_port
+          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
         end
 
         response = request_without_trace(*args, &block)
 
-        span.finish
-        span.options["status"] = response.code
+        span.exit
+        span.set_tag "http.status_code", response.code
 
         if (response.code.to_i >= 300 || response.code.to_i <= 308) && response.header["Location"]
-          span.options["location"] = response.header["Location"]
+          span.set_tag "http.redirect", response.header["Location"]
         end
 
-        trace.submit(opts)
+        span.finish
       else
         response = request_without_trace(*args, &block)
       end

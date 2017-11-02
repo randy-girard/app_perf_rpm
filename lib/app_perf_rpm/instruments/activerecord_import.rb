@@ -12,29 +12,38 @@ module AppPerfRpm
             [sql_copy.shift, sql_copy.join( ' ' )]
           end
 
-          adapter = ::ActiveRecord::Base.connection_config[:adapter]
-
+          adapter = connection_config.fetch(:adapter)
           sanitized_sql = sanitize_sql(base_sql + values.join( ',' ) + post_sql, adapter)
 
-          AppPerfRpm::Tracer.trace('activerecord') do |span|
-            span.options = {
-              "adapter" => adapter,
-              "query" => sanitized_sql,
-              "name" => self.class.name
-            }
-
-            insert_many_without_trace(sql, values, *args)
-          end
-        else
-          insert_many_without_trace(sql, values, *args)
+          span = AppPerfRpm.tracer.start_span(self.class.name || 'sql.query', tags: {
+            "component" => "ActiveRecordImport",
+            "span.kind" => "client",
+            "db.statement" => sanitized_sql,
+            "db.user" => connection_config.fetch(:username, 'unknown'),
+            "db.instance" => connection_config.fetch(:database),
+            "db.vendor" => adapter,
+            "db.type" => "sql"
+          })
+          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
         end
+
+        insert_many_without_trace(sql, values, *args)
+      rescue Exception => e
+        if span
+          span.set_tag('error', true)
+          span.log_error(e)
+        end
+        raise
+      ensure
+        span.finish if span
       end
     end
   end
 end
 
 
-if ::AppPerfRpm.configuration.instrumentation[:active_record_import][:enabled] &&
+if ::AppPerfRpm.config.instrumentation[:active_record_import][:enabled] &&
   defined?(ActiveRecord::Import::PostgreSQLAdapter)
   AppPerfRpm.logger.info "Initializing activerecord-import tracer."
 

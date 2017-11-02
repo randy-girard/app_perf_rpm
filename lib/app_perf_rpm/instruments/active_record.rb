@@ -7,7 +7,7 @@ module AppPerfRpm
   end
 end
 
-if ::AppPerfRpm.configuration.instrumentation[:active_record][:enabled] &&
+if ::AppPerfRpm.config.instrumentation[:active_record][:enabled] &&
   defined?(::ActiveRecord)
   AppPerfRpm.logger.info "Initializing activerecord tracer."
 

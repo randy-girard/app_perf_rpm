@@ -4,15 +4,23 @@ module AppPerfRpm
       module Base
         def dispatch_with_trace
           if ::AppPerfRpm::Tracer.tracing?
-            ::AppPerfRpm::Tracer.trace("sinatra") do |span|
-              span.controller = self.class.to_s
-              span.action = env["PATH_INFO"]
-
-              dispatch_without_trace
-            end
-          else
-            dispatch_without_trace
+            operation = "#{self.class}##{env["PATH_INFO"]}"
+            span = ::AppPerfRpm.tracer.start_span(operation, tags: {
+              component: "Sinatra"
+            })
+            span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+            span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
           end
+
+          dispatch_without_trace
+        rescue Exception => e
+          if span
+            span.set_tag('error', true)
+            span.log_error(e)
+          end
+          raise
+        ensure
+          span.finish if span
         end
 
         def handle_exception_with_trace(boom)
@@ -25,27 +33,33 @@ module AppPerfRpm
           if ::AppPerfRpm::Tracer.tracing?
             name = data
 
-            ::AppPerfRpm::Tracer.trace("sinatra") do |span|
-              span.options = {
-                "engine" => engine,
-                "name" => name,
-                "type" => "render",
-                "file" => __FILE__,
-                "line_number" => __LINE__
-              }
-
-              render_without_trace(engine, data, options, locals, &block)
-            end
-          else
-            render_without_trace(engine, data, options, locals, &block)
+            span = ::AppPerfRpm.tracer.start_span("render", tags: {
+              "component" => "Sinatra",
+              "view.engine" => engine,
+              "view.name" => name,
+              "view.line_number" => __LINE__,
+              "view.template" => __FILE__
+            })
+            span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+            span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
           end
+
+          render_without_trace(engine, data, options, locals, &block)
+        rescue Exception => e
+          if span
+            span.set_tag('error', true)
+            span.log_error(e)
+          end
+          raise
+        ensure
+          span.finish if span
         end
       end
     end
   end
 end
 
-if ::AppPerfRpm.configuration.instrumentation[:sinatra][:enabled] &&
+if ::AppPerfRpm.config.instrumentation[:sinatra][:enabled] &&
   defined?(::Sinatra)
   ::AppPerfRpm.logger.info "Initializing sinatra tracer."
 
