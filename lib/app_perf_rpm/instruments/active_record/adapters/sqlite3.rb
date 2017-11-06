@@ -19,82 +19,123 @@ module AppPerfRpm
 
           def exec_query_with_trace(sql, name = nil, binds = [])
             if ::AppPerfRpm::Tracer.tracing?
-              if ignore_trace?(name)
-                exec_query_without_trace(sql, name, binds)
-              else
-                sanitized_sql = sanitize_sql(sql, :sqlite)
+              unless ignore_trace?(name)
+                adapter = connection_config.fetch(:adapter)
+                sanitized_sql = sanitize_sql(sql, adapter)
 
-                AppPerfRpm::Tracer.trace('activerecord', opts) do |span|
-                  span.options = {
-                    "adapter" => "postgresql",
-                    "query" => sanitized_sql,
-                    "name" => name
-                  }
-
-                  exec_query_without_trace(sql, name, binds)
-                end
+                span = AppPerfRpm.tracer.start_span('sql.query', tags: {
+                  "component" => "ActiveRecord",
+                  "span.kind" => "client",
+                  "db.statement" => sanitized_sql,
+                  "db.user" => connection_config.fetch(:username, 'unknown'),
+                  "db.instance" => connection_config.fetch(:database),
+                  "db.vendor" => adapter,
+                  "db.type" => "sql"
+                })
+                span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+                span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
               end
-            else
-              exec_query_without_trace(sql, name, binds)
             end
+
+            exec_query_without_trace(sql, name, binds)
+          rescue Exception => e
+            if span
+              span.set_tag('error', true)
+              span.log_error(e)
+            end
+            raise
+          ensure
+            span.finish if span
           end
 
           def exec_delete_with_trace(sql, name = nil, binds = [])
             if ::AppPerfRpm::Tracer.tracing?
-              if ignore_trace?(name)
-                exec_delete_without_trace(sql, name, binds)
-              else
-                sanitized_sql = sanitize_sql(sql, :sqlite)
+              unless ignore_trace?(name)
+                adapter = connection_config.fetch(:adapter)
+                sanitized_sql = sanitize_sql(sql, adapter)
 
-                AppPerfRpm::Tracer.trace('activerecord', opts) do |span|
-                  span.options = {
-                    "adapter" => "postgresql",
-                    "query" => sanitized_sql,
-                    "name" => name
-                  }
-
-                  exec_delete_without_trace(sql, name, binds)
-                end
+                span = AppPerfRpm.tracer.start_span('sql.query', tags: {
+                  "component" => "ActiveRecord",
+                  "span.kind" => "client",
+                  "db.statement" => sanitized_sql,
+                  "db.user" => connection_config.fetch(:username, 'unknown'),
+                  "db.instance" => connection_config.fetch(:database),
+                  "db.vendor" => adapter,
+                  "db.type" => "sql"
+                })
+                span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+                span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
               end
-            else
-              exec_delete_without_trace(sql, name, binds)
             end
+
+            exec_delete_without_trace(sql, name, binds)
+          rescue Exception => e
+            if span
+              span.set_tag('error', true)
+              span.log_error(e)
+            end
+            raise
+          ensure
+            span.finish if span
           end
 
           def exec_insert_with_trace(sql, name = nil, binds = [], *args)
             if ::AppPerfRpm::Tracer.tracing?
-              if ignore_trace?(name)
-                exec_insert_without_trace(sql, name, binds, *args)
-              else
-                sanitized_sql = sanitize_sql(sql, :sqlite)
+              unless ignore_trace?(name)
+                adapter = connection_config.fetch(:adapter)
+                sanitized_sql = sanitize_sql(sql, adapter)
 
-                AppPerfRpm::Tracer.trace('activerecord', opts) do |span|
-                  span.options = {
-                    "adapter" => "postgresql",
-                    "query" => sanitized_sql,
-                    "name" => name
-                  }
-
-                  exec_insert_without_trace(sql, name, binds, *args)
-                end
+                span = AppPerfRpm.tracer.start_span('sql.query', tags: {
+                  "component" => "ActiveRecord",
+                  "span.kind" => "client",
+                  "db.statement" => sanitized_sql,
+                  "db.user" => connection_config.fetch(:username, 'unknown'),
+                  "db.instance" => connection_config.fetch(:database),
+                  "db.vendor" => adapter,
+                  "db.type" => "sql"
+                })
+                span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+                span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
               end
-            else
-              exec_insert_without_trace(sql, name, binds, *args)
             end
+
+            exec_insert_without_trace(sql, name, binds, *args)
+          rescue Exception => e
+            if span
+              span.set_tag('error', true)
+              span.log_error(e)
+            end
+            raise
+          ensure
+            span.finish if span
           end
 
           def begin_db_transaction_with_trace
             if ::AppPerfRpm::Tracer.tracing?
-              AppPerfRpm::Tracer.trace('activerecord', opts) do |span|
-                span.options = {
-                  "adapter" => "postgresql",
-                  "query" => "BEGIN"
-                }
-                begin_db_transaction_without_trace
-              end
-            else
-              begin_db_transaction_without_trace
+              adapter = connection_config.fetch(:adapter)
+
+              span = AppPerfRpm.tracer.start_span('sql.query', tags: {
+                "component" => "ActiveRecord",
+                "span.kind" => "client",
+                "db.statement" => "BEGIN",
+                "db.user" => connection_config.fetch(:username, 'unknown'),
+                "db.instance" => connection_config.fetch(:database),
+                "db.vendor" => adapter,
+                "db.type" => "sql"
+              })
+              span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+              span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
             end
+
+            begin_db_transaction_without_trace
+          rescue Exception => e
+            if span
+              span.set_tag('error', true)
+              span.log_error(e)
+            end
+            raise
+          ensure
+            span.finish if span
           end
         end
       end

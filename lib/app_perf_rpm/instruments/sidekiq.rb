@@ -3,41 +3,85 @@ module AppPerfRpm
     def call(*args)
       worker, msg, queue = args
 
-      result = AppPerfRpm::Tracer.start_trace("sidekiq-worker") do |span|
-        span.type = "job"
-        span.controller = "Sidekiq_#{queue}"
-        span.action = msg["wrapped"]
-        span.url = "/sidekiq/#{queue}/#{msg['wrapped']}"
-        span.domain = Socket.gethostname
-        span.options = {
-          "job_name" => worker.class.to_s,
-          "queue" => queue
-        }
+      parent_span_context = extract(msg)
+      AppPerfRpm::Tracer.sample!(parent_span_context)
 
-        yield
+      if AppPerfRpm::Tracer.tracing?
+        operation = "Sidekiq_#{queue}##{msg["wrapped"]}"
+        span = AppPerfRpm.tracer.start_span(operation, :child_of => parent_span_context, tags: {
+          "component" => "Sidekiq",
+          "span.kind" => "server",
+          "http.url" => "/sidekiq/#{queue}/#{msg['wrapped']}",
+          "peer.address" => Socket.gethostname,
+          "bg.queue" => queue,
+          "bg.job_name" => worker.class.to_s
+        })
+        span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+        span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
       end
 
-      result
+      yield
+    rescue Exception => e
+      if span
+        span.set_tag('error', true)
+        span.log_error(e)
+      end
+      raise
+    ensure
+      span.finish if span
+    end
+
+    private
+
+    def extract(job)
+      carrier = job[AppPerfRpm::TRACE_CONTEXT_KEY]
+      return unless carrier
+      AppPerfRpm::tracer.extract(OpenTracing::FORMAT_TEXT_MAP, carrier)
     end
   end
 
   class SidekiqClient
     def call(*args)
-      if ::AppPerfRpm::Tracer.tracing?
-        worker, msg, queue = args
+      worker, msg, queue = args
 
-        result = AppPerfRpm::Tracer.trace("sidekiq-client") do |span|
-          yield
-        end
-      else
-        result = yield
+      if ::AppPerfRpm::Tracer.tracing?
+        operation = "Sidekiq_#{queue}##{msg["wrapped"]}"
+        span = AppPerfRpm.tracer.start_span(operation, tags: {
+          "component" => "Sidekiq",
+          "span.kind" => "client",
+          "http.url" => "/sidekiq/#{queue}/#{msg['wrapped']}",
+          "peer.address" => Socket.gethostname,
+          "bg.queue" => queue,
+          "bg.job_name" => worker.class.to_s
+        })
+        span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+        span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+
+        inject(span, msg)
       end
-      result
+
+      yield
+    rescue Exception => e
+      if span
+        span.set_tag('error', true)
+        span.log_error(e)
+      end
+      raise
+    ensure
+      span.finish if span
+    end
+
+    private
+
+    def inject(span, job)
+      carrier = {}
+      AppPerfRpm.tracer.inject(span.context, OpenTracing::FORMAT_TEXT_MAP, carrier)
+      job[AppPerfRpm::TRACE_CONTEXT_KEY] = carrier
     end
   end
 end
 
-if ::AppPerfRpm.configuration.instrumentation[:sidekiq][:enabled] &&
+if ::AppPerfRpm.config.instrumentation[:sidekiq][:enabled] &&
   defined?(::Sidekiq)
   AppPerfRpm.logger.info "Initializing sidekiq tracer."
 

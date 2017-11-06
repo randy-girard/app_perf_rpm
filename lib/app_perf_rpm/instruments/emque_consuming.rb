@@ -5,21 +5,30 @@ module AppPerfRpm
         def route_with_trace(topic, type, message)
           action = type.to_s.split(".").last
 
-          ::AppPerfRpm::Tracer.start_trace("emque-consuming", opts) do |span|
-            span.controller = topic
-            span.action = action
-            span.url = "/#{topic}/#{action}"
-            span.domain = Socket.gethostname
+          span = ::AppPerfRpm.tracer.start_span("#{topic}##{action}", tags: {
+            "component" => "EmqueConsuming",
+            "http.url" => "/#{topic}/#{action}",
+            "peer.address" => Socket.gethostname
+          })
+          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
 
-            route_without_trace(topic, type, message)
+          route_without_trace(topic, type, message)
+        rescue Exception => e
+          if span
+            span.set_tag('error', true)
+            span.log_error(e)
           end
+          raise
+        ensure
+          span.finish if span
         end
       end
     end
   end
 end
 
-if ::AppPerfRpm.configuration.instrumentation[:emque_consuming][:enabled] && defined?(Emque::Consuming)
+if ::AppPerfRpm.config.instrumentation[:emque_consuming][:enabled] && defined?(Emque::Consuming)
   AppPerfRpm.logger.info "Initializing emque-consuming tracer."
 
   Emque::Consuming::Router.send(:include, AppPerfRpm::Instruments::EmqueConsuming::Router)

@@ -3,34 +3,51 @@ module AppPerfRpm
     module ActionController
       def process_action_with_trace(method_name, *args)
         if ::AppPerfRpm::Tracer.tracing?
-          AppPerfRpm::Tracer.trace('actioncontroller') do |span|
-            span.controller = self.class.name
-            span.action = self.action_name
-
-            process_action_without_trace(method_name, *args)
-          end
-        else
-          process_action_without_trace(method_name, *args)
+          operation = "#{self.class.name}##{self.action_name}"
+          span = AppPerfRpm.tracer.start_span(operation, tags: {
+            "component" => "ActionController",
+            "span.kind" => "client"
+          })
+          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
         end
+
+        process_action_without_trace(method_name, *args)
+      rescue Exception => e
+        if span
+          span.set_tag('error', true)
+          span.log_error(e)
+        end
+        raise
+      ensure
+        span.finish if span
       end
 
       def perform_action_with_trace(*arguments)
         if ::AppPerfRpm::Tracer.tracing?
-          AppPerfRpm::Tracer.trace('actioncontroller') do |span|
-            span.controller = @_request.path_parameters['controller']
-            span.action = @_request.path_parameters['action']
-
-            perform_action_without_trace(*arguments)
-          end
-        else
-          perform_action_without_trace(*arguments)
+          operation = "#{@_request.path_parameters['controller']}##{@_request.path_parameters['action']}"
+          span = AppPerfRpm.tracer.start_span(operation, tags: {
+            "component" => "ActionController",
+            "span.kind" => "client"
+          })
+          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
         end
+        perform_action_without_trace(*arguments)
+      rescue Exception => e
+        if span
+          span.set_tag('error', true)
+          span.log_error(e)
+        end
+        raise
+      ensure
+        span.finish if span
       end
     end
   end
 end
 
-if ::AppPerfRpm.configuration.instrumentation[:action_controller][:enabled] &&
+if ::AppPerfRpm.config.instrumentation[:action_controller][:enabled] &&
   defined?(::ActionController)
   AppPerfRpm.logger.info "Initializing actioncontroller tracer."
 

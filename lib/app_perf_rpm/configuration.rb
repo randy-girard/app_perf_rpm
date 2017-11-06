@@ -9,10 +9,11 @@ module AppPerfRpm
                   :ssl,
                   :sample_rate,
                   :sample_threshold,
-                  :dispatch_interval,
+                  :flush_interval,
                   :application_name,
                   :instrumentation,
-                  :agent_disabled
+                  :agent_disabled,
+                  :ignore_paths
 
     def initialize
       reload
@@ -27,10 +28,11 @@ module AppPerfRpm
         self.application_name ||= "Default"
         self.sample_rate ||= 10 # Percentage of request to sample
         self.sample_threshold ||= 0 # Minimum amount of duration to sample
-        self.dispatch_interval ||= 60 # In seconds
+        self.flush_interval ||= 60 # In seconds
         self.agent_disabled ||= default_if_blank(ENV["APP_PERF_AGENT_DISABLED"], false)
+        self.ignore_paths ||= /\/assets/
         self.instrumentation = {
-          :rack                 => { :enabled => true, :backtrace => false, :trace_middleware => true },
+          :rack                 => { :enabled => true, :backtrace => false, :trace_middleware => false },
           :active_record        => { :enabled => true, :backtrace => false },
           :active_record_import => { :enabled => true, :backtrace => false },
           :action_view          => { :enabled => true, :backtrace => false },

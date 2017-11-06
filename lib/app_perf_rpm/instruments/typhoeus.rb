@@ -2,43 +2,62 @@ module AppPerfRpm
   module Instruments
     module TyphoeusRequest
       def run_with_trace
-        if ::AppPerfRpm.tracing?
-          span = ::AppPerfRpm::Tracer.start_span("typhoeus")
-          response = run_without_trace
-          span.finish
+        if ::AppPerfRpm::Tracer.tracing?
+          span = ::AppPerfRpm.tracer.start_span("typhoeus", tags: {
+            "component" => "Typhoeus"
+          })
+          AppPerfRpm.tracer.inject(span.context, OpenTracing::FORMAT_RACK, options[:headers])
 
+          response = run_without_trace
+          span.exit
           uri = URI(response.effective_url)
 
-          span.options = {
-            "http_status" => response.code,
-            "remote_url" => uri.to_s,
-            "http_method" => options[:method]
-          }
-          span.submit(opts)
-
-          response
+          span.set_tag "http.status_code", response.code
+          span.set_tag "http.url", uri.to_s
+          span.set_tag "http.method", options[:method]
+          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
         else
-          run_without_trace
+          response = run_without_trace
         end
+        response
+      rescue Exception => e
+        if span
+          span.set_tag('error', true)
+          span.log_error(e)
+        end
+        raise
+      ensure
+        span.finish if span
       end
     end
 
     module TyphoeusHydra
       def run_with_trace
-        ::AppPerfRpm::Tracer.trace("typhoeus") do |span|
-          span.options = {
-            "method" => :hydra,
-            "queued_requests" => queued_requests.count,
-            "max_concurrency" => max_concurrency
-          }
-          run_without_trace
+        span = ::AppPerfRpm.tracer.start_span("typhoeus", tags: {
+          "component" => "Typhoeus",
+          "method" => "hydra",
+          "http.queued_requests" => queued_requests.count,
+          "http.max_concurrency" => max_concurrency
+        })
+        span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+        span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+
+        run_without_trace
+      rescue Exception => e
+        if span
+          span.set_tag('error', true)
+          span.log_error(e)
         end
+        raise
+      ensure
+        span.finish if span
       end
     end
   end
 end
 
-if ::AppPerfRpm.configuration.instrumentation[:typhoeus][:enabled] && defined?(::Typhoeus)
+if ::AppPerfRpm.config.instrumentation[:typhoeus][:enabled] && defined?(::Typhoeus)
   ::AppPerfRpm.logger.info "Initializing typhoeus tracer."
 
   ::Typhoeus::Request::Operations.send(:include, AppPerfRpm::Instruments::TyphoeusRequest)

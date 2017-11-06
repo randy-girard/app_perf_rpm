@@ -1,46 +1,54 @@
-if ::AppPerfRpm.configuration.instrumentation[:action_view][:enabled] && defined?(::ActionView)
+if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::ActionView)
   if defined?(Rails) && Rails::VERSION::MAJOR == 2
     ActionView::Partials.module_eval do
       alias :render_partial_without_trace :render_partial
       def render_partial(options = {})
         if ::AppPerfRpm::Tracer.tracing? && options.key?(:partial) && options[:partial].is_a?(String)
-          opts = {
-            "method" => "render_partial",
-            "name" => options[:partial]
-          }
-
-          opts["backtrace"] = ::AppPerfRpm::Backtrace.backtrace
-          opts["source"] = ::AppPerfRpm::Backtrace.source_extract
-
-          AppPerfRpm::Tracer.trace("actionview", opts) do |span|
-            span.controller = @_request.path_parameters['controller']
-            span.action = @_request.path_parameters['action']
-            span.backtrace = ::AppPerfRpm::Backtrace.backtrace
-            span.source = ::AppPerfRpm::Backtrace.source_extract
-
-            render_partial_without_trace(options)
-          end
-        else
-          render_partial_without_trace(options)
+          span = AppPerfRpm.tracer.start_span("render_partial", tags: {
+            "component" => "ActionView",
+            "span.kind" => "client",
+            "view.controller" => @_request.path_parameters['controller'],
+            "view.action" => @_request.path_parameters['action'],
+            "view.template" => options[:partial]
+          })
+          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
         end
+
+        render_partial_without_trace(options)
+      rescue Exception => e
+        if span
+          span.set_tag('error', true)
+          span.log_error(e)
+        end
+        raise
+      ensure
+        span.finish if span
       end
 
       alias :render_partial_collection_without_trace :render_partial_collection
       def render_partial_collection(options = {})
         if ::AppPerfRpm::Tracer.tracing?
-          AppPerfRpm::Tracer.trace("actionview") do |span|
-            span.backtrace = ::AppPerfRpm::Backtrace.backtrace
-            span.source = ::AppPerfRpm::Backtrace.source_extract
-            span.options = {
-              "method" => "render_partial_collection",
-              "name" => @path
-            }
-
-            render_partial_collection_without_trace(options)
-          end
-        else
-          render_partial_collection_without_trace(options)
+          span = AppPerfRpm.tracer.start_span("render_partial_collection", tags: {
+            "component" => "ActionView",
+            "span.kind" => "client",
+            "view.controller" => @_request.path_parameters['controller'],
+            "view.action" => @_request.path_parameters['action'],
+            "view.template" => @path
+          })
+          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
         end
+
+        render_partial_collection_without_trace(options)
+      rescue Exception => e
+        if span
+          span.set_tag('error', true)
+          span.log_error(e)
+        end
+        raise
+      ensure
+        span.finish if span
       end
     end
   else
@@ -48,35 +56,49 @@ if ::AppPerfRpm.configuration.instrumentation[:action_view][:enabled] && defined
       alias :render_partial_without_trace :render_partial
       def render_partial
         if ::AppPerfRpm::Tracer.tracing?
-          AppPerfRpm::Tracer.trace("actionview") do |span|
-            span.backtrace = ::AppPerfRpm::Backtrace.backtrace
-            span.source = ::AppPerfRpm::Backtrace.source_extract
-            span.options = {
-              "method" => "render_partial",
-              "name" => @options[:partial]
-            }
-
-            render_partial_without_trace
-          end
-        else
-          render_partial_without_trace
+          span = AppPerfRpm.tracer.start_span("render_partial", tags: {
+            "component" => "ActionView",
+            "span.kind" => "client",
+            "view.template" => @options[:partial]
+          })
+          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
         end
+
+        render_partial_without_trace
+      rescue Exception => e
+        if span
+          span.set_tag('error', true)
+          span.log_error(e)
+        end
+        raise
+      ensure
+        span.finish if span
       end
 
       alias :render_collection_without_trace :render_collection
       def render_collection
         if ::AppPerfRpm::Tracer.tracing?
-          AppPerfRpm::Tracer.trace("actionview") do |span|
-            span.options = {
-              "method" => "render_collection",
-              "name" => @path
-            }
-
-            render_collection_without_trace
-          end
-        else
-          render_collection_without_trace
+          span = AppPerfRpm.tracer.start_span("render_collection", tags: {
+            "component" => "ActionView",
+            "span.kind" => "client",
+            "view.controller" => @_request.path_parameters['controller'],
+            "view.action" => @_request.path_parameters['action'],
+            "view.template" => @path
+          })
+          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
         end
+
+        render_collection_without_trace
+      rescue Exception => e
+        if span
+          span.set_tag('error', true)
+          span.log_error(e)
+        end
+        raise
+      ensure
+        span.finish if span
       end
     end
 
@@ -99,25 +121,31 @@ if ::AppPerfRpm.configuration.instrumentation[:action_view][:enabled] && defined
             @path = path
           end
 
-          AppPerfRpm::Tracer.trace("actionview") do |span|
-            if layout
-              span.options = {
-                "method" => "render_with_layout",
-                "name" => layout.identifier,
-                "path" => @path,
-                "layout" => layout
-              }
-            else
-              span.options = {
-                "method" => "render_without_layout",
-                "path" => @path
-              }
+          if layout
+            span = AppPerfRpm.tracer.start_span("render_with_layout")
+            # span.set_tag "view.layout", layout
+            span.set_tag "view.template", layout.identifier
+          else
+            span = AppPerfRpm.tracer.start_span("render_without_layout")
+            if @path
+              span.set_tag "view.template", @path.call
             end
-            render_with_layout_without_trace(path, locals, *args, &block)
           end
-        else
-          render_with_layout_without_trace(path, locals, *args, &block)
+          span.set_tag "component", "ActionView"
+          span.set_tag "span.kind", "client"
+          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
         end
+
+        render_with_layout_without_trace(path, locals, *args, &block)
+      rescue Exception => e
+        if span
+          span.set_tag('error', true)
+          span.log_error(e)
+        end
+        raise
+      ensure
+        span.finish if span
       end
     end
   end

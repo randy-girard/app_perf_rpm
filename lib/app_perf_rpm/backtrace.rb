@@ -8,7 +8,7 @@ module AppPerfRpm
       end
 
       def clean(backtrace)
-        backtrace
+        Array(backtrace)
           .map {|b| clean_line(b) }
           .select {|b| b !~ %r{lib/app_perf_rpm} }
       end
@@ -27,7 +27,7 @@ module AppPerfRpm
       #end
 
       def source_extract(_backtrace = Kernel.caller(0))
-        Array(_backtrace).select {|bt| bt[/^#{::AppPerfRpm.configuration.app_root.to_s}\//] }.map do |trace|
+        Array(_backtrace).select {|bt| bt[/^#{::AppPerfRpm.config.app_root.to_s}\//] }.map do |trace|
           file, line_number = extract_file_and_line_number(trace)
           source_to_hash(file, line_number)
         end
@@ -41,13 +41,13 @@ module AppPerfRpm
         }
       end
 
-      private
-
       def clean_line(line)
         line
-          .sub(/#{::AppPerfRpm.configuration.app_root.to_s}\//, "[APP_PATH]/")
+          .sub(/#{::AppPerfRpm.config.app_root.to_s}\//, "[APP_PATH]/")
           .sub(gems_regexp, '\2 (\3) [GEM_PATH]/\4')
       end
+
+      private
 
       def gems_regexp
         gems_paths = (Gem.path | [Gem.default_dir]).map { |p| Regexp.escape(p) }
@@ -59,8 +59,8 @@ module AppPerfRpm
       end
 
       def source_fragment(path, line)
-        return unless AppPerfRpm.configuration.app_root
-        full_path = AppPerfRpm.configuration.app_root.join(path)
+        return unless AppPerfRpm.config.app_root
+        full_path = AppPerfRpm.config.app_root.join(path)
         if File.exist?(full_path)
           File.open(full_path, "r") do |file|
             start = [line - 3, 0].max

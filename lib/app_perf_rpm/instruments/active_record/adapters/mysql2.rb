@@ -19,24 +19,33 @@ module AppPerfRpm
 
           def execute_with_trace(sql, name = nil)
             if ::AppPerfRpm::Tracer.tracing?
-              if ignore_trace?(name)
-                execute_without_trace(sql, name)
-              else
-                sanitized_sql = sanitize_sql(sql, :mysql2)
+              unless ignore_trace?(name)
+                adapter = connection_config.fetch(:adapter)
+                sanitized_sql = sanitize_sql(sql, adapter)
 
-                AppPerfRpm::Tracer.trace('activerecord') do |span|
-                  span.options ={
-                    "adapter" => "mysql2",
-                    "query" => sanitized_sql,
-                    "name" => name
-                  }
-
-                  execute_without_trace(sql, name)
-                end
+                span = AppPerfRpm.tracer.start_span(name || 'sql.query', tags: {
+                  "component" => "ActiveRecord",
+                  "span.kind" => "client",
+                  "db.statement" => sanitized_sql,
+                  "db.user" => connection_config.fetch(:username, 'unknown'),
+                  "db.instance" => connection_config.fetch(:database),
+                  "db.vendor" => adapter,
+                  "db.type" => "sql"
+                })
+                span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
+                span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
               end
-            else
-              execute_without_trace(sql, name)
             end
+
+            execute_without_trace(sql, name)
+          rescue Exception => e
+            if span
+              span.set_tag('error', true)
+              span.log_error(e)
+            end
+            raise
+          ensure
+            span.finish if span
           end
         end
       end
