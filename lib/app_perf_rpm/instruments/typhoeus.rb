@@ -2,10 +2,12 @@ module AppPerfRpm
   module Instruments
     module TyphoeusRequest
       def run_with_trace
-        if ::AppPerfRpm.tracing?
+        if ::AppPerfRpm::Tracer.tracing?
           span = ::AppPerfRpm.tracer.start_span("typhoeus", tags: {
             "component" => "Typhoeus"
           })
+          AppPerfRpm.tracer.inject(span.context, OpenTracing::FORMAT_RACK, options[:headers])
+
           response = run_without_trace
           span.exit
           uri = URI(response.effective_url)
@@ -16,8 +18,9 @@ module AppPerfRpm
           span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
           span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
         else
-          run_without_trace
+          response = run_without_trace
         end
+        response
       rescue Exception => e
         if span
           span.set_tag('error', true)

@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.homepage      = 'https://www.github.com/randy-girard/app_perf_rpm'
   s.license       = 'MIT'
 
-  s.add_runtime_dependency "oj", "3.3.2"
+  s.add_runtime_dependency "oj"
   s.add_runtime_dependency "opentracing", "0.3.1"
 
   s.add_development_dependency "rake", "12.0.0"

@@ -2,11 +2,12 @@ module AppPerfRpm
   module Instruments
     module FaradayConnection
       def run_request_with_trace(method, url, body, headers, &block)
-        if ::AppPerfRpm.tracing?
+        if ::AppPerfRpm::Tracer.tracing?
           span = ::AppPerfRpm.tracer.start_span("faraday", tags: {
             "component" => "Faraday",
             "span.kind" => "client"
           })
+          AppPerfRpm.tracer.inject(span.context, OpenTracing::FORMAT_RACK, @headers)
           result = run_request_without_trace(method, url, body, headers, &block)
           span.set_tag "middleware", @builder.handlers
           span.set_tag "peer.hostname", @url_prefix.host
@@ -19,8 +20,9 @@ module AppPerfRpm
           span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
           span.finish
         else
-          run_request_without_trace(method, url, body, headers, &block)
+          result = run_request_without_trace(method, url, body, headers, &block)
         end
+        result
       rescue Exception => e
         if span
           span.set_tag('error', true)

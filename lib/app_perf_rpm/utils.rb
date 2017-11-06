@@ -7,7 +7,11 @@ module AppPerfRpm
     end
 
     def connection_config
-      @connection_config ||= ::ActiveRecord::Base.connection_config
+      @connection_config ||= if ::ActiveRecord::VERSION::MAJOR == 2
+                               ActiveRecord::Base.connection.instance_variable_get(:@config)
+                             else
+                               ::ActiveRecord::Base.connection_config
+                             end
     end
 
     def format_redis(command)

@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     app_perf_rpm (0.0.6)
-      oj (= 3.3.2)
+      oj
       opentracing (= 0.3.1)
 
 GEM
