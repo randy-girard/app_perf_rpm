@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    app_perf_rpm (0.0.7)
+    app_perf_rpm (0.0.9)
       msgpack
       opentracing (= 0.3.1)
 
