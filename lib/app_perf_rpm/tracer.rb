@@ -6,7 +6,7 @@ module AppPerfRpm
       # This method should be called by any components that are
       # capable of starting the tracing process.
       # ie. rack, sidekiq worker, etc
-      def sample!(incoming_trace = nil)
+      def sample!(incoming_trace = nil, force = false)
         # Since we keep track of the active span, meaning we have entered into
         # tracing at some point, and we no longer have an active span,
         # reset tracing.
@@ -14,7 +14,7 @@ module AppPerfRpm
 
         # Now determine if we want to trace, either by an incoming
         # trace or meeting the sample rate.
-        Thread.current[:sample] = !!incoming_trace || should_sample?
+        Thread.current[:sample] = force || !!incoming_trace || should_sample?
         Thread.current[:sample]
       end
 

@@ -16,8 +16,7 @@ module AppPerfRpm
           span.set_tag "http.url", url
           span.set_tag "http.method", method
           span.set_tag "http.status_code", result.status
-          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+          AppPerfRpm::Utils.log_source_and_backtrace(span, :faraday)
           span.finish
         else
           result = run_request_without_trace(method, url, body, headers, &block)

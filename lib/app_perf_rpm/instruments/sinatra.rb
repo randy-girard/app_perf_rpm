@@ -8,8 +8,7 @@ module AppPerfRpm
             span = ::AppPerfRpm.tracer.start_span(operation, tags: {
               component: "Sinatra"
             })
-            span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-            span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+            AppPerfRpm::Utils.log_source_and_backtrace(span, :sinatra)
           end
 
           dispatch_without_trace
@@ -40,8 +39,7 @@ module AppPerfRpm
               "view.line_number" => __LINE__,
               "view.template" => __FILE__
             })
-            span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-            span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+            AppPerfRpm::Utils.log_source_and_backtrace(span, :sinatra)
           end
 
           render_without_trace(engine, data, options, locals, &block)

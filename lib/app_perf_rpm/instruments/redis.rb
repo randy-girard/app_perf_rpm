@@ -15,8 +15,7 @@ module AppPerf
             "db.instance" => self.db,
             "db.statement" => format_redis_command(*command)
           })
-          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+          AppPerfRpm::Utils.log_source_and_backtrace(span, :redis)
         end
 
         call_without_trace(*command, &block)
@@ -42,8 +41,7 @@ module AppPerf
             "db.instance" => self.db,
             "db.statement" => pipeline[0].commands.map { |c| format_redis_command(c) }.join("\n")
           })
-          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+          AppPerfRpm::Utils.log_source_and_backtrace(span, :redis)
         end
 
         call_pipeline_without_trace(*pipeline)

@@ -40,8 +40,7 @@ module AppPerfRpm
           span = ::AppPerfRpm.tracer.start_span("sequel", tags: parse_opts(sql, options))
           span.set_tag "component", "Sequel"
           span.set_tag "span.kind", "client"
-          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+          AppPerfRpm::Utils.log_source_and_backtrace(span, :sequel)
         end
 
         run_without_trace(sql, options)
@@ -64,8 +63,7 @@ module AppPerfRpm
           span = ::AppPerfRpm.tracer.start_span("sequel", tags: parse_opts(sql, options))
           span.set_tag "component", "Sequel"
           span.set_tag "span.kind", "client"
-          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+          AppPerfRpm::Utils.log_source_and_backtrace(span, :sequel)
         end
 
         execute_without_trace(sql, options, &block)
