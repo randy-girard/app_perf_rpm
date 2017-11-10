@@ -8,8 +8,7 @@ module AppPerfRpm
             "component" => "ActionController",
             "span.kind" => "client"
           })
-          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+          AppPerfRpm::Utils.log_source_and_backtrace(span, :action_controller)
         end
 
         process_action_without_trace(method_name, *args)
@@ -30,8 +29,7 @@ module AppPerfRpm
             "component" => "ActionController",
             "span.kind" => "client"
           })
-          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+          AppPerfRpm::Utils.log_source_and_backtrace(span, :action_controller)
         end
         perform_action_without_trace(*arguments)
       rescue Exception => e

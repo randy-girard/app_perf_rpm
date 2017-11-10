@@ -1,4 +1,4 @@
-require 'oj'
+require 'msgpack'
 
 module AppPerfRpm
   require 'app_perf_rpm/logger'

@@ -29,7 +29,7 @@ module AppPerfRpm
       private
 
       def compress_body(data)
-        body = Oj.dump({
+        body = MessagePack.pack({
           "name" => AppPerfRpm.config.application_name,
           "host" => AppPerfRpm.host,
           "data" => data
@@ -46,7 +46,6 @@ module AppPerfRpm
         sock.use_ssl = ::AppPerfRpm.config.ssl
 
         request = Net::HTTP::Post.new(@spans_uri.request_uri, {
-          'Content-Type' => 'application/json',
           "Accept-Encoding" => "gzip",
           "User-Agent" => "gzip"
         })

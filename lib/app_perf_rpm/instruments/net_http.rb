@@ -16,8 +16,7 @@ if ::AppPerfRpm.config.instrumentation[:net_http][:enabled] && defined?(Net::HTT
           span.set_tag "http.url", req.path
           span.set_tag "http.method", req.method
           span.set_tag "peer.hostname", addr_port
-          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+          AppPerfRpm::Utils.log_source_and_backtrace(span, :net_http)
         end
 
         response = request_without_trace(*args, &block)

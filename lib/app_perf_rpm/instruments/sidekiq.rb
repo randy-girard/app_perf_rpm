@@ -16,8 +16,7 @@ module AppPerfRpm
           "bg.queue" => queue,
           "bg.job_name" => worker.class.to_s
         })
-        span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-        span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+        AppPerfRpm::Utils.log_source_and_backtrace(span, :sidekiq)
       end
 
       yield
@@ -54,8 +53,7 @@ module AppPerfRpm
           "bg.queue" => queue,
           "bg.job_name" => worker.class.to_s
         })
-        span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-        span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+        AppPerfRpm::Utils.log_source_and_backtrace(span, :sidekiq)
 
         inject(span, msg)
       end

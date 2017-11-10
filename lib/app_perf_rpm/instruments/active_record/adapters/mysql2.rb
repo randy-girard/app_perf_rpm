@@ -32,8 +32,7 @@ module AppPerfRpm
                   "db.vendor" => adapter,
                   "db.type" => "sql"
                 })
-                span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-                span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+                AppPerfRpm::Utils.log_source_and_backtrace(span, :active_record)
               end
             end
 

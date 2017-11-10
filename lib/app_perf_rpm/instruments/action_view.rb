@@ -11,8 +11,7 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
             "view.action" => @_request.path_parameters['action'],
             "view.template" => options[:partial]
           })
-          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+          AppPerfRpm::Utils.log_source_and_backtrace(span, :action_view)
         end
 
         render_partial_without_trace(options)
@@ -36,8 +35,7 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
             "view.action" => @_request.path_parameters['action'],
             "view.template" => @path
           })
-          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+          AppPerfRpm::Utils.log_source_and_backtrace(span, :action_view)
         end
 
         render_partial_collection_without_trace(options)
@@ -61,8 +59,7 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
             "span.kind" => "client",
             "view.template" => @options[:partial]
           })
-          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+          AppPerfRpm::Utils.log_source_and_backtrace(span, :action_view)
         end
 
         render_partial_without_trace
@@ -86,8 +83,7 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
             "view.action" => @_request.path_parameters['action'],
             "view.template" => @path
           })
-          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+          AppPerfRpm::Utils.log_source_and_backtrace(span, :action_view)
         end
 
         render_collection_without_trace
@@ -133,8 +129,7 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
           end
           span.set_tag "component", "ActionView"
           span.set_tag "span.kind", "client"
-          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+          AppPerfRpm::Utils.log_source_and_backtrace(span, :action_view)
         end
 
         render_with_layout_without_trace(path, locals, *args, &block)

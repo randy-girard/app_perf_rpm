@@ -51,7 +51,7 @@ module AppPerfRpm
           message: exception.message,
           error_class: exception.class.to_s,
           backtrace: AppPerfRpm::Backtrace.clean(exception.backtrace),
-          source: AppPerfRpm::Backtrace.source_extract(exception.backtrace)
+          source: AppPerfRpm::Backtrace.source_extract(backtrace: exception.backtrace)
         )
       end
 

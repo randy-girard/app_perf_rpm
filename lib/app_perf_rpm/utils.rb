@@ -23,5 +23,21 @@ module AppPerfRpm
     def format_redis_command(command)
       command.map { |x| format_redis(x) }.join(' ')
     end
+
+    def self.log_source_and_backtrace(span, instrument)
+      config = ::AppPerfRpm.config.instrumentation[instrument] || {}
+      if kind = config[:backtrace]
+        backtrace = AppPerfRpm::Backtrace.backtrace(kind: kind)
+        if backtrace.length > 0
+          span.log(event: "backtrace", stack: backtrace)
+        end
+      end
+      if config[:source]
+        source = AppPerfRpm::Backtrace.source_extract
+        if source.length > 0
+          span.log(event: "source", stack: source)
+        end
+      end
+    end
   end
 end

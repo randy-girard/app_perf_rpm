@@ -60,15 +60,14 @@ if ::AppPerfRpm.config.instrumentation[:rack][:enabled]
 
           unless ignore_path?(req.path)
             extracted_ctx = AppPerfRpm.tracer.extract(OpenTracing::FORMAT_RACK, env)
-            AppPerfRpm::Tracer.sample!(extracted_ctx)
+            AppPerfRpm::Tracer.sample!(extracted_ctx, !!req.params["app-perf-sample"])
 
             if AppPerfRpm::Tracer.tracing?
               span = AppPerfRpm.tracer.start_span(@app.class.name, :child_of => extracted_ctx, tags: {
                 "component" => "Rack",
                 "span.kind" => "client"
               })
-              span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-              span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+              AppPerfRpm::Utils.log_source_and_backtrace(span, :rack)
             end
           end
 

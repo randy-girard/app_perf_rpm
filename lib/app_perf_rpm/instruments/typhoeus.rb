@@ -15,8 +15,7 @@ module AppPerfRpm
           span.set_tag "http.status_code", response.code
           span.set_tag "http.url", uri.to_s
           span.set_tag "http.method", options[:method]
-          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+          AppPerfRpm::Utils.log_source_and_backtrace(span, :typhoeus)
         else
           response = run_without_trace
         end
@@ -40,8 +39,7 @@ module AppPerfRpm
           "http.queued_requests" => queued_requests.count,
           "http.max_concurrency" => max_concurrency
         })
-        span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-        span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+        AppPerfRpm::Utils.log_source_and_backtrace(span, :typhoeus)
 
         run_without_trace
       rescue Exception => e

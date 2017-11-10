@@ -10,8 +10,7 @@ module AppPerfRpm
             "http.url" => "/#{topic}/#{action}",
             "peer.address" => Socket.gethostname
           })
-          span.log(event: "backtrace", stack: ::AppPerfRpm::Backtrace.backtrace)
-          span.log(event: "source", stack: ::AppPerfRpm::Backtrace.source_extract)
+          AppPerfRpm::Utils.log_source_and_backtrace(span, :emque_consuming)
 
           route_without_trace(topic, type, message)
         rescue Exception => e

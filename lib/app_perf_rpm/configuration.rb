@@ -32,19 +32,19 @@ module AppPerfRpm
         self.agent_disabled ||= default_if_blank(ENV["APP_PERF_AGENT_DISABLED"], false)
         self.ignore_paths ||= /\/assets/
         self.instrumentation = {
-          :rack                 => { :enabled => true, :backtrace => false, :trace_middleware => false },
-          :active_record        => { :enabled => true, :backtrace => false },
-          :active_record_import => { :enabled => true, :backtrace => false },
-          :action_view          => { :enabled => true, :backtrace => false },
-          :action_controller    => { :enabled => true, :backtrace => false },
-          :emque_consuming      => { :enabled => true, :backtrace => false },
-          :redis                => { :enabled => true, :backtrace => false },
-          :sequel               => { :enabled => true, :backtrace => false },
-          :sidekiq              => { :enabled => true, :backtrace => false },
-          :sinatra              => { :enabled => true, :backtrace => false },
-          :net_http             => { :enabled => true, :backtrace => false },
-          :typhoeus             => { :enabled => true, :backtrace => false },
-          :faraday              => { :enabled => true, :backtrace => false }
+          :rack                 => { :enabled => true, :backtrace => :app, :source => true, :trace_middleware => false },
+          :active_record        => { :enabled => true, :backtrace => :app, :source => true },
+          :active_record_import => { :enabled => true, :backtrace => :app, :source => true },
+          :action_view          => { :enabled => true, :backtrace => :app, :source => true },
+          :action_controller    => { :enabled => true, :backtrace => :app, :source => true },
+          :emque_consuming      => { :enabled => true, :backtrace => :app, :source => true },
+          :redis                => { :enabled => true, :backtrace => :app, :source => true },
+          :sequel               => { :enabled => true, :backtrace => :app, :source => true },
+          :sidekiq              => { :enabled => true, :backtrace => :app, :source => true },
+          :sinatra              => { :enabled => true, :backtrace => :app, :source => true },
+          :net_http             => { :enabled => true, :backtrace => :app, :source => true },
+          :typhoeus             => { :enabled => true, :backtrace => :app, :source => true },
+          :faraday              => { :enabled => true, :backtrace => :app, :source => true }
         }
       end
     end
