@@ -17,7 +17,7 @@ module AppPerfRpm
               name == 'ActiveRecord::SchemaMigration Load'
           end
 
-          def exec_query_with_trace(sql, name = nil, binds = [])
+          def exec_query_with_trace(sql, name = nil, *args)
             if ::AppPerfRpm::Tracer.tracing?
               unless ignore_trace?(name)
                 adapter = connection_config.fetch(:adapter)
@@ -36,7 +36,7 @@ module AppPerfRpm
               end
             end
 
-            exec_query_without_trace(sql, name, binds)
+            exec_query_without_trace(sql, name, *args)
           rescue Exception => e
             if span
               span.set_tag('error', true)
@@ -47,7 +47,7 @@ module AppPerfRpm
             span.finish if span
           end
 
-          def exec_delete_with_trace(sql, name = nil, binds = [])
+          def exec_delete_with_trace(sql, name = nil, *args)
             if ::AppPerfRpm::Tracer.tracing?
               unless ignore_trace?(name)
                 adapter = connection_config.fetch(:adapter)
@@ -66,7 +66,7 @@ module AppPerfRpm
               end
             end
 
-            exec_delete_without_trace(sql, name, binds)
+            exec_delete_without_trace(sql, name, *args)
           rescue Exception => e
             if span
               span.set_tag('error', true)
@@ -77,7 +77,7 @@ module AppPerfRpm
             span.finish if span
           end
 
-          def exec_insert_with_trace(sql, name = nil, binds = [], *args)
+          def exec_insert_with_trace(sql, name = nil, *args)
             if ::AppPerfRpm::Tracer.tracing?
               unless ignore_trace?(name)
                 adapter = connection_config.fetch(:adapter)
@@ -96,7 +96,7 @@ module AppPerfRpm
               end
             end
 
-            exec_insert_without_trace(sql, name, binds, *args)
+            exec_insert_without_trace(sql, name, *args)
           rescue Exception => e
             if span
               span.set_tag('error', true)
