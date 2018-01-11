@@ -3,7 +3,7 @@ $:.push "#{File.expand_path('..', __FILE__)}/lib"
 
 Gem::Specification.new do |s|
   s.name          = 'app_perf_rpm'
-  s.version       = '0.1.0'
+  s.version       = '0.1.1'
   s.date          = '2016-05-16'
   s.summary       = "AppPerf Ruby Agent"
   s.description   = "Ruby Agent for the AppPerf app."

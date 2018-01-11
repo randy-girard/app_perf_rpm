@@ -79,10 +79,12 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
           span = AppPerfRpm.tracer.start_span("render_collection", tags: {
             "component" => "ActionView",
             "span.kind" => "client",
-            "view.controller" => @_request.path_parameters['controller'],
-            "view.action" => @_request.path_parameters['action'],
             "view.template" => @path
           })
+          if @_request
+            span.set_tag('view.controller', @_request.path_parameters['controller'])
+            span.set_tag('view.action', @_request.path_parameters['action'])
+          end
           AppPerfRpm::Utils.log_source_and_backtrace(span, :action_view)
         end
 
