@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    app_perf_rpm (0.0.9)
+    app_perf_rpm (0.1.0)
       msgpack
       opentracing (= 0.3.1)
 
@@ -66,7 +66,7 @@ GEM
     mime-types-data (3.2016.0521)
     mini_portile2 (2.3.0)
     minitest (5.10.3)
-    msgpack (1.1.0)
+    msgpack (1.2.0)
     nokogiri (1.8.1)
       mini_portile2 (~> 2.3.0)
     opentracing (0.3.1)
