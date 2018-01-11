@@ -28,6 +28,7 @@ module AppPerfRpm
       raise
     ensure
       span.finish if span
+      AppPerfRpm::Tracer.sample_off!
     end
 
     private

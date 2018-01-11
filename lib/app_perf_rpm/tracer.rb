@@ -10,12 +10,16 @@ module AppPerfRpm
         # Since we keep track of the active span, meaning we have entered into
         # tracing at some point, and we no longer have an active span,
         # reset tracing.
-        Thread.current[:sample] = false if !AppPerfRpm.tracer.active_span
+        sample_off! if !AppPerfRpm.tracer.active_span
 
         # Now determine if we want to trace, either by an incoming
         # trace or meeting the sample rate.
         Thread.current[:sample] = force || !!incoming_trace || should_sample?
         Thread.current[:sample]
+      end
+
+      def sample_off!
+        Thread.current[:sample] = false
       end
 
       def sampled?
