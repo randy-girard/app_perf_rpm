@@ -1,5 +1,3 @@
-require 'opentracing'
-
 module AppPerfRpm
   class Tracer
     class << self

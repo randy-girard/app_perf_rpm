@@ -150,7 +150,11 @@ module AppPerfRpm
     end
 
     def now
-      Process.clock_gettime(Process::CLOCK_REALTIME)
+      if defined?(Process::CLOCK_REALTIME)
+        Process.clock_gettime(Process::CLOCK_REALTIME)
+      else
+        Time.now
+      end
     end
 
   end

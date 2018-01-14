@@ -1,0 +1,106 @@
+
+
+Processing ApplicationController#index (for 127.0.0.1 at 2018-01-12 21:02:40) [GET]
+
+ActionController::RoutingError (No route matches "/index" with {:method=>:get}):
+  <internal:prelude>:10:in `synchronize'
+  /Users/rgirard/.rvm/rubies/ruby-1.9.3-p484/lib/ruby/1.9.1/forwardable.rb:201:in `get'
+  /Users/rgirard/Documents/Personal/app_perf_rpm/spec/app_perf_rpm/instruments/action_controller_spec.rb:50:in `block (2 levels) in <top (required)>'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:254:in `instance_exec'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:254:in `block in run'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:500:in `block in with_around_and_singleton_context_hooks'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:457:in `block in with_around_example_hooks'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/hooks.rb:466:in `block in run'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/hooks.rb:604:in `run_around_example_hooks_for'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/hooks.rb:466:in `run'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:457:in `with_around_example_hooks'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:500:in `with_around_and_singleton_context_hooks'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:251:in `run'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example_group.rb:628:in `block in run_examples'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example_group.rb:624:in `map'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example_group.rb:624:in `run_examples'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example_group.rb:590:in `run'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:118:in `block (3 levels) in run_specs'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:118:in `map'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:118:in `block (2 levels) in run_specs'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/configuration.rb:1926:in `with_suite_hooks'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:113:in `block in run_specs'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/reporter.rb:79:in `report'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:112:in `run_specs'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:87:in `run'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:71:in `run'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:45:in `invoke'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/exe/rspec:4:in `<top (required)>'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/bin/rspec:23:in `load'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/bin/rspec:23:in `<main>'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/bin/ruby_executable_hooks:15:in `eval'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/bin/ruby_executable_hooks:15:in `<main>'
+
+Rendering rescues/layout (not_found)
+
+
+Processing ApplicationController#index (for 127.0.0.1 at 2018-01-12 21:02:56) [GET]
+
+ActionController::RoutingError (No route matches "/index" with {:method=>:get}):
+  <internal:prelude>:10:in `synchronize'
+  /Users/rgirard/.rvm/rubies/ruby-1.9.3-p484/lib/ruby/1.9.1/forwardable.rb:201:in `get'
+  /Users/rgirard/Documents/Personal/app_perf_rpm/spec/app_perf_rpm/instruments/action_controller_spec.rb:50:in `block (2 levels) in <top (required)>'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:254:in `instance_exec'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:254:in `block in run'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:500:in `block in with_around_and_singleton_context_hooks'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:457:in `block in with_around_example_hooks'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/hooks.rb:466:in `block in run'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/hooks.rb:604:in `run_around_example_hooks_for'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/hooks.rb:466:in `run'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:457:in `with_around_example_hooks'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:500:in `with_around_and_singleton_context_hooks'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example.rb:251:in `run'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example_group.rb:628:in `block in run_examples'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example_group.rb:624:in `map'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example_group.rb:624:in `run_examples'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/example_group.rb:590:in `run'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:118:in `block (3 levels) in run_specs'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:118:in `map'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:118:in `block (2 levels) in run_specs'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/configuration.rb:1926:in `with_suite_hooks'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:113:in `block in run_specs'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/reporter.rb:79:in `report'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:112:in `run_specs'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:87:in `run'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:71:in `run'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/lib/rspec/core/runner.rb:45:in `invoke'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/gems/rspec-core-3.7.1/exe/rspec:4:in `<top (required)>'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/bin/rspec:23:in `load'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/bin/rspec:23:in `<main>'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/bin/ruby_executable_hooks:15:in `eval'
+  /Users/rgirard/.rvm/gems/ruby-1.9.3-p484/bin/ruby_executable_hooks:15:in `<main>'
+
+Rendering rescues/layout (not_found)
+
+
+Processing TestsController#index (for 0.0.0.0 at 2018-01-14 13:19:10) [GET]
+Completed in 6ms (View: 5, DB: 0) | 200 OK [http://test.host/tests]
+
+
+Processing TestsController#index (for 0.0.0.0 at 2018-01-14 13:21:08) [GET]
+Completed in 6ms (View: 4, DB: 0) | 200 OK [http://test.host/tests]
+
+
+Processing TestsController#index (for 0.0.0.0 at 2018-01-14 13:25:02) [GET]
+Completed in 5ms (View: 4, DB: 0) | 200 OK [http://test.host/tests]
+
+
+Processing TestsController#index (for 0.0.0.0 at 2018-01-14 13:25:32) [GET]
+Completed in 5ms (View: 4, DB: 0) | 200 OK [http://test.host/tests]
+
+
+Processing TestsController#index (for 0.0.0.0 at 2018-01-14 13:29:51) [GET]
+Completed in 7ms (View: 6, DB: 0) | 200 OK [http://test.host/tests]
+
+
+Processing TestsController#index (for 0.0.0.0 at 2018-01-14 13:37:35) [GET]
+Completed in 7ms (View: 5, DB: 0) | 200 OK [http://test.host/tests]
+
+
+Processing TestsController#index (for 0.0.0.0 at 2018-01-14 13:38:32) [GET]
+Completed in 7ms (View: 6, DB: 0) | 200 OK [http://test.host/tests]
