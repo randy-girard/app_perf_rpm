@@ -12,7 +12,7 @@ script:
   - bundle exec rspec
 
 rvm:
-  - 1.9.3-p484
+  - 1.9.3
   - 2.1.2
   - 2.2.2
 
@@ -28,9 +28,9 @@ gemfile:
 
 matrix:
   exclude:
-  - rvm: 1.9.3-p484
+  - rvm: 1.9.3
     gemfile: gemfiles/rails_5.0.gemfile
-  - rvm: 1.9.3-p484
+  - rvm: 1.9.3
     gemfile: gemfiles/rails_5.1.gemfile
 
   - rvm: 2.1.2
