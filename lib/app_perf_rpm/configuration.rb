@@ -34,6 +34,7 @@ module AppPerfRpm
         self.instrumentation = {
           :rack                    => { :enabled => true, :backtrace => :app, :source => true, :trace_middleware => false },
           :roda                    => { :enabled => true, :backtrace => :app, :source => true },
+          :grape                   => { :enabled => true, :backtrace => :app, :source => true },
           :active_record           => { :enabled => true, :backtrace => :app, :source => true },
           :active_record_import    => { :enabled => true, :backtrace => :app, :source => true },
           :active_model_serializer => { :enabled => true, :backtrace => :app, :source => true },

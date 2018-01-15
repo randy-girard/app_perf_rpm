@@ -16,20 +16,18 @@ describe AppPerfRpm::Utils do
       stack: anything
     ).and_call_original
     AppPerfRpm::Utils.log_source_and_backtrace(span, :test)
-
-    expect(span.log_entries[0]["fields"][:stack].length).to eql(26)
     expect(span.log_entries[1]["fields"][:stack][0..1]).to eql([
       {
         "file"=>"[APP_PATH]/lib/app_perf_rpm/backtrace.rb",
         "code"=>{
-          43=>"      #end\n",
-          44=>"\n",
-          45=>"      def source_extract(backtrace: Kernel.caller(0))\n",
-          46=>"        Array(backtrace).select {|bt| bt[/^\#{::AppPerfRpm.config.app_root.to_s}\\//] }.map do |trace|\n",
-          47=>"          file, line_number = extract_file_and_line_number(trace)\n",
-          48=>"          source_to_hash(file, line_number)\n"
+          45=>"      #end\n",
+          46=>"\n",
+          47=>"      def source_extract(opts = { :backtrace => Kernel.caller(0) })\n",
+          48=>"        backtrace = opts[:backtrace]\n",
+          49=>"\n",
+          50=>"        Array(backtrace).select {|bt| bt[/^\#{::AppPerfRpm.config.app_root.to_s}\\//] }.map do |trace|\n"
         },
-        "line_number"=>45
+        "line_number"=>47
       },
       {
         "file"=>"[APP_PATH]/lib/app_perf_rpm/utils.rb",

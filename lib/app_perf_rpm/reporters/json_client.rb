@@ -6,10 +6,10 @@ require 'base64'
 module AppPerfRpm
   module Reporters
     class JsonClient
-      def initialize(url:, collector:, flush_interval:)
-        @collector = collector
-        @flush_interval = flush_interval
-        @spans_uri = URI.parse(url)
+      def initialize(opts = { :url => nil, :collector => nil, :flush_interval => nil })
+        @collector = opts[:collector]
+        @flush_interval = opts[:flush_interval]
+        @spans_uri = URI.parse(opts[:url])
       end
 
       def start
