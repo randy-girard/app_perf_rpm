@@ -17,13 +17,13 @@ module AppPerfRpm
               name == 'ActiveRecord::SchemaMigration Load'
           end
 
-          def exec_query_with_trace(sql, name = nil, binds = [])
+          def exec_query_with_trace(sql, name = nil, *args)
             if ::AppPerfRpm::Tracer.tracing?
               unless ignore_trace?(name)
                 adapter = connection_config.fetch(:adapter)
                 sanitized_sql = sanitize_sql(sql, adapter)
 
-                span = AppPerfRpm.tracer.start_span('sql.query', tags: {
+                span = AppPerfRpm.tracer.start_span(name || 'SQL', tags: {
                   "component" => "ActiveRecord",
                   "span.kind" => "client",
                   "db.statement" => sanitized_sql,
@@ -36,7 +36,7 @@ module AppPerfRpm
               end
             end
 
-            exec_query_without_trace(sql, name, binds)
+            exec_query_without_trace(sql, name, *args)
           rescue Exception => e
             if span
               span.set_tag('error', true)
@@ -47,13 +47,13 @@ module AppPerfRpm
             span.finish if span
           end
 
-          def exec_delete_with_trace(sql, name = nil, binds = [])
+          def exec_delete_with_trace(sql, name = nil, *args)
             if ::AppPerfRpm::Tracer.tracing?
               unless ignore_trace?(name)
                 adapter = connection_config.fetch(:adapter)
                 sanitized_sql = sanitize_sql(sql, adapter)
 
-                span = AppPerfRpm.tracer.start_span('sql.query', tags: {
+                span = AppPerfRpm.tracer.start_span(name || 'SQL', tags: {
                   "component" => "ActiveRecord",
                   "span.kind" => "client",
                   "db.statement" => sanitized_sql,
@@ -66,7 +66,7 @@ module AppPerfRpm
               end
             end
 
-            exec_delete_without_trace(sql, name, binds)
+            exec_delete_without_trace(sql, name, *args)
           rescue Exception => e
             if span
               span.set_tag('error', true)
@@ -77,13 +77,13 @@ module AppPerfRpm
             span.finish if span
           end
 
-          def exec_insert_with_trace(sql, name = nil, binds = [], *args)
+          def exec_insert_with_trace(sql, name = nil, *args)
             if ::AppPerfRpm::Tracer.tracing?
               unless ignore_trace?(name)
                 adapter = connection_config.fetch(:adapter)
                 sanitized_sql = sanitize_sql(sql, adapter)
 
-                span = AppPerfRpm.tracer.start_span('sql.query', tags: {
+                span = AppPerfRpm.tracer.start_span(name || 'SQL', tags: {
                   "component" => "ActiveRecord",
                   "span.kind" => "client",
                   "db.statement" => sanitized_sql,
@@ -111,7 +111,7 @@ module AppPerfRpm
             if ::AppPerfRpm::Tracer.tracing?
               adapter = connection_config.fetch(:adapter)
 
-              span = AppPerfRpm.tracer.start_span('sql.query', tags: {
+              span = AppPerfRpm.tracer.start_span(name || 'SQL', tags: {
                 "component" => "ActiveRecord",
                 "span.kind" => "client",
                 "db.statement" => "BEGIN",

@@ -23,7 +23,7 @@ module AppPerfRpm
                 adapter = connection_config.fetch(:adapter)
                 sanitized_sql = sanitize_sql(sql, adapter)
 
-                span = AppPerfRpm.tracer.start_span(name || 'sql.query', tags: {
+                span = AppPerfRpm.tracer.start_span(name || 'SQL', tags: {
                   "component" => "ActiveRecord",
                   "span.kind" => "client",
                   "db.statement" => sanitized_sql,

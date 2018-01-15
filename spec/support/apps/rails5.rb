@@ -1,27 +1,12 @@
-require "action_controller/railtie"
-require 'active_support/all'
-require 'action_controller'
-require 'action_dispatch'
-require 'rspec/rails'
+require 'support/apps/base_application'
 
-module Rails
-  class App
-    def config; OpenStruct.new(:root => ""); end
-    def env_config; {} end
-    def env_defaults; @env_defaults ||= {}; end
-    def routes
-      return @routes if defined?(@routes)
-      @routes = ActionDispatch::Routing::RouteSet.new
-      @routes.draw do
-        resources :tests # Replace with your own needs
-      end
-      @routes
-    end
-  end
-
-  def self.application
-    @app ||= App.new
+module Rails5
+  class Application < AppPerfRpm::TestRailsApp
   end
 end
 
-require 'support/apps/controllers'
+Rails.application.routes.append do
+  resources :tests, :only => [:index]
+end
+
+Rails5::Application.do_initialization!

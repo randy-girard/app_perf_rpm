@@ -5,5 +5,6 @@ source "https://rubygems.org"
 gem "rake", "~> 11.0", platforms: :ruby_19
 gem "rails", "~> 3.1.0"
 gem "test-unit", "~> 3.0"
+gem "sqlite3"
 
 gemspec path: "../"
