@@ -16,8 +16,6 @@ describe AppPerfRpm::Utils do
       stack: anything
     ).and_call_original
     AppPerfRpm::Utils.log_source_and_backtrace(span, :test)
-
-    expect(span.log_entries[0]["fields"][:stack].length).to eql(30)
     expect(span.log_entries[1]["fields"][:stack][0..1]).to eql([
       {
         "file"=>"[APP_PATH]/lib/app_perf_rpm/backtrace.rb",
