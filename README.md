@@ -1,5 +1,7 @@
 # AppPerf Ruby Agent
 
+[![Build Status](https://travis-ci.org/randy-girard/app_perf_rpm.svg?branch=master)](https://travis-ci.org/randy-girard/app_perf_rpm)
+
 Ruby Agent for the AppPerf app
 
 https://www.github.com/randy-girard/app_perf
