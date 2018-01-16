@@ -3,7 +3,7 @@ language: ruby
 cache: bundler
 
 before_install:
-  - gem update bundler
+  - gem install bundler
 
 before_script:
   - bundle update
@@ -23,18 +23,28 @@ gemfile:
   - gemfiles/rails_4.0.gemfile
   - gemfiles/rails_4.1.gemfile
   - gemfiles/rails_4.2.gemfile
-  - gemfiles/rails_5.0.gemfile
+  - gemfiles/rails_5.0_sqlite3.gemfile
+  - gemfiles/rails_5.0_mysql2.gemfile
+  - gemfiles/rails_5.0_pg.gemfile
   - gemfiles/rails_5.1.gemfile
 
 matrix:
   exclude:
   - rvm: 1.9.3
-    gemfile: gemfiles/rails_5.0.gemfile
+    gemfile: gemfiles/rails_5.0_sqlite3.gemfile
+  - rvm: 1.9.3
+    gemfile: gemfiles/rails_5.0_mysql2.gemfile
+  - rvm: 1.9.3
+    gemfile: gemfiles/rails_5.0_pg.gemfile
   - rvm: 1.9.3
     gemfile: gemfiles/rails_5.1.gemfile
 
   - rvm: 2.1.2
-    gemfile: gemfiles/rails_5.0.gemfile
+    gemfile: gemfiles/rails_5.0_sqlite3.gemfile
+  - rvm: 2.1.2
+    gemfile: gemfiles/rails_5.0_mysql2.gemfile
+  - rvm: 2.1.2
+    gemfile: gemfiles/rails_5.0_pg.gemfile
   - rvm: 2.1.2
     gemfile: gemfiles/rails_5.1.gemfile
 

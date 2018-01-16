@@ -3,3 +3,6 @@
 *.gem
 /coverage
 /vendor/bundle
+/gemfiles/*.lock
+/*.sqlite3
+/log/*
