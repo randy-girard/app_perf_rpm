@@ -23,8 +23,10 @@ module AppPerfRpm
         thread_span_stack.active_span
       end
 
-      def start_span(operation_name, opts = { :child_of => active_span }, *args)
-        span = @tracer.start_span(operation_name, { :child_of => opts[:child_of] }, *args)
+      def start_span(operation_name, opts = {}, *args)
+        opts[:child_of] ||= active_span
+
+        span = @tracer.start_span(operation_name, opts, *args)
         @thread_span_stack.set_active_span(span)
       end
     end

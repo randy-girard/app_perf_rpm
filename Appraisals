@@ -48,18 +48,21 @@ appraise "rails-5.0-sqlite3" do
   gem "rails", "~> 5.0.0"
   gem 'test-unit', '~> 3.0'
   gem 'sqlite3'
+  gem 'activerecord-import'
 end
 
 appraise "rails-5.0-mysql2" do
   gem "rails", "~> 5.0.0"
   gem 'test-unit', '~> 3.0'
   gem 'mysql2'
+  gem 'activerecord-import'
 end
 
 appraise "rails-5.0-pg" do
   gem "rails", "~> 5.0.0"
   gem 'test-unit', '~> 3.0'
   gem 'pg', '~> 0.18.4'
+  gem 'activerecord-import'
 end
 
 appraise "rails-5.1" do

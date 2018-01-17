@@ -1,7 +1,7 @@
 module AppPerfRpm
   class Backtrace
     class << self
-      def backtrace(opts = { :kind => :all })
+      def backtrace(opts = {})
         kind = opts[:kind]
 
         if kind
@@ -44,8 +44,8 @@ module AppPerfRpm
       #  end
       #end
 
-      def source_extract(opts = { :backtrace => Kernel.caller(0) })
-        backtrace = opts[:backtrace]
+      def source_extract(opts = {})
+        backtrace = opts[:backtrace] || Kernel.caller(0)
 
         Array(backtrace).select {|bt| bt[/^#{::AppPerfRpm.config.app_root.to_s}\//] }.map do |trace|
           file, line_number = extract_file_and_line_number(trace)
@@ -95,7 +95,7 @@ module AppPerfRpm
         [file, line.to_i]
       end
 
-      def trim_backtrace(_backtrace, opts = { :kind => :all })
+      def trim_backtrace(_backtrace, opts = {})
         kind = opts[:kind]
 
         return _backtrace unless _backtrace.is_a?(Array)

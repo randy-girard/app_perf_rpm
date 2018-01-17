@@ -27,7 +27,9 @@ module AppPerfRpm
         end
       end
 
-      def finish(opts = { :end_time => AppPerfRpm.now })
+      def finish(opts = {})
+        opts[:end_time] ||= AppPerfRpm.now
+
         deactivate
         @span.finish(end_time: opts[:end_time])
       end
