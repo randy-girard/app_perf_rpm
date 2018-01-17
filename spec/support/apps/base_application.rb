@@ -1,6 +1,6 @@
+require 'support/db_helper'
 require "rails/all"
 require 'rspec/rails'
-require 'support/db_helper'
 
 module AppPerfRpm
   class TestRailsApp < Rails::Application

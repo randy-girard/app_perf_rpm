@@ -3,8 +3,13 @@ module AppPerfRpm
     class Tracer
       attr_reader :thread_span_stack, :collector
 
-      def self.build(opts = { :collector => nil, :sender => nil, :service_name => nil })
+      def self.build(opts = {})
+        opts[:collector] ||= nil
+        opts[:sender] ||= nil
+        opts[:service_name] ||= nil
+
         opts[:sender].start
+
         new(opts[:collector], opts[:sender])
       end
 
@@ -17,8 +22,10 @@ module AppPerfRpm
         @sender.stop
       end
 
-      def start_span(operation_name, opts = { :child_of => nil, :start_time => AppPerfRpm.now, :tags => {} }, *)
-        child_of = opts[:child_of]
+      def start_span(operation_name, opts = {}, *)
+        child_of = opts[:child_of] || nil
+        opts[:start_time] ||= AppPerfRpm.now
+        opts[:tags] ||= {}
 
         context =
           if child_of

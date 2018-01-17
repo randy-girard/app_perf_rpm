@@ -17,12 +17,12 @@ module AppPerfRpm
 
       attr_reader :span_id, :parent_id, :trace_id, :baggage
 
-      def initialize(opts = { :span_id => nil, :parent_id => nil, :trace_id => nil, :sampled => nil, :baggage => {} })
-        @span_id = opts[:span_id]
-        @parent_id = opts[:parent_id]
-        @trace_id = opts[:trace_id]
-        @sampled = opts[:sampled]
-        @baggage = opts[:baggage]
+      def initialize(opts = {})
+        @span_id = opts[:span_id] || nil
+        @parent_id = opts[:parent_id] || nil
+        @trace_id = opts[:trace_id] || nil
+        @sampled = opts[:sampled] || nil
+        @baggage = opts[:baggage] || {}
       end
 
       def set_baggage_item(key, value)
