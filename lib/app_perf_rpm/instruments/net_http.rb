@@ -4,7 +4,7 @@ if ::AppPerfRpm.config.instrumentation[:net_http][:enabled] && defined?(Net::HTT
   Net::HTTP.class_eval do
     def request_with_trace(*args, &block)
       if ::AppPerfRpm::Tracer.tracing?
-        span = ::AppPerfRpm.tracer.start_span("net-http", {
+        span = ::AppPerfRpm.tracer.start_span("net-http", tags: {
           "component" => "NetHttp",
           "span.kind" => "client"
         })
