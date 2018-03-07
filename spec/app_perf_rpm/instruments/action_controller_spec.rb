@@ -30,7 +30,7 @@ describe TestsController, :type => :controller do
     }) { action_view_partial_span }
 
     action_view_render_span = double("Span")
-    expect(action_view_render_span).to receive(:set_tag).with("view.layout", nil)
+    expect(action_view_render_span).to receive(:set_tag).with("view.layout", /layouts\/application/)
     expect(action_view_render_span).to receive(:set_tag).with("view.template", anything)
     expect(action_view_render_span).to receive(:set_tag).with("component", "ActionView")
     expect(action_view_render_span).to receive(:set_tag).with("span.kind", "client")
