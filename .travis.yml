@@ -12,7 +12,6 @@ script:
   - bundle exec rspec
 
 rvm:
-  - 1.9.3
   - 2.1.2
   - 2.2.2
   - 2.4.1
@@ -32,15 +31,6 @@ gemfile:
 
 matrix:
   exclude:
-  - rvm: 1.9.3
-    gemfile: gemfiles/rails_5.0_sqlite3.gemfile
-  - rvm: 1.9.3
-    gemfile: gemfiles/rails_5.0_mysql2.gemfile
-  - rvm: 1.9.3
-    gemfile: gemfiles/rails_5.0_pg.gemfile
-  - rvm: 1.9.3
-    gemfile: gemfiles/rails_5.1.gemfile
-
   - rvm: 2.1.2
     gemfile: gemfiles/rails_5.0_sqlite3.gemfile
   - rvm: 2.1.2
@@ -54,3 +44,29 @@ matrix:
     gemfile: gemfiles/rails_3.0.gemfile
   - rvm: 2.2.2
     gemfile: gemfiles/rails_3.1.gemfile
+
+  - rvm: 2.4.1
+    gemfile: gemfiles/rails_3.0.gemfile
+  - rvm: 2.4.1
+    gemfile: gemfiles/rails_3.1.gemfile
+  - rvm: 2.4.1
+    gemfile: gemfiles/rails_3.2.gemfile
+  - rvm: 2.4.1
+    gemfile: gemfiles/rails_4.0.gemfile
+  - rvm: 2.4.1
+    gemfile: gemfiles/rails_4.1.gemfile
+  - rvm: 2.4.1
+    gemfile: gemfiles/rails_4.2.gemfile
+
+  - rvm: 2.5.0
+    gemfile: gemfiles/rails_3.0.gemfile
+  - rvm: 2.5.0
+    gemfile: gemfiles/rails_3.1.gemfile
+  - rvm: 2.5.0
+    gemfile: gemfiles/rails_3.2.gemfile
+  - rvm: 2.5.0
+    gemfile: gemfiles/rails_4.0.gemfile
+  - rvm: 2.5.0
+    gemfile: gemfiles/rails_4.1.gemfile
+  - rvm: 2.5.0
+    gemfile: gemfiles/rails_4.2.gemfile

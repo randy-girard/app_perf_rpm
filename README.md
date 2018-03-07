@@ -44,12 +44,12 @@ wwtd
 
 Currently, AppPerf supports the following versions of frameworks and rubies:
 
-- Rails 3.0.x, Ruby 1.9.3, 2.1.2, 2.4.1, 2.5.0
-- Rails 3.1.x, Ruby 1.9.3, 2.1.2, 2.4.1, 2.5.0
-- Rails 3.2.x, Ruby 1.9.3, 2.1.2, 2.2.2, 2.4.1, 2.5.0
-- Rails 4.0.x, Ruby 1.9.3, 2.1.2, 2.2.2, 2.4.1, 2.5.0
-- Rails 4.1.x, Ruby 1.9.3, 2.1.2, 2.2.2, 2.4.1, 2.5.0
-- Rails 4.2.x, Ruby 1.9.3, 2.1.2, 2.2.2, 2.4.1, 2.5.0
+- Rails 3.0.x, Ruby 2.1.2
+- Rails 3.1.x, Ruby 2.1.2
+- Rails 3.2.x, Ruby 2.1.2, 2.2.2
+- Rails 4.0.x, Ruby 2.1.2, 2.2.2
+- Rails 4.1.x, Ruby 2.1.2, 2.2.2
+- Rails 4.2.x, Ruby 2.1.2, 2.2.2
 - Rails 5.0.x, Ruby 2.2.2, 2.4.1, 2.5.0
 - Rails 5.1.x, Ruby 2.2.2, 2.4.1, 2.5.0
 
