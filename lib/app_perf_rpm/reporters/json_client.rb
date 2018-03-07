@@ -2,7 +2,6 @@
 
 require 'net/http'
 require 'uri'
-require 'msgpack'
 require 'base64'
 
 module AppPerfRpm

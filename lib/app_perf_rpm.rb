@@ -2,7 +2,8 @@
 
 module AppPerfRpm
   require "opentracing"
-
+  require 'msgpack'
+  
   require 'app_perf_rpm/logger'
   require 'app_perf_rpm/configuration'
   require 'app_perf_rpm/backtrace'

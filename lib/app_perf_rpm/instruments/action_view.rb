@@ -111,7 +111,7 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
         if ::AppPerfRpm::Tracer.tracing?
           span = AppPerfRpm.tracer.start_span("render_template")
           span.set_tag "view.template", template
-          span.set_tag "view.layout", layout
+          span.set_tag "view.layout", layout.to_s
           span.set_tag "component", "ActionView"
           span.set_tag "span.kind", "client"
           AppPerfRpm::Utils.log_source_and_backtrace(span, :action_view)
@@ -194,7 +194,7 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
                      find_layout(layout_name, locals)
                    end
           span = AppPerfRpm.tracer.start_span("render_template")
-          span.set_tag "view.layout", layout
+          span.set_tag "view.layout", layout.inspect
           span.set_tag "view.template", template.identifier
           span.set_tag "component", "ActionView"
           span.set_tag "span.kind", "client"
