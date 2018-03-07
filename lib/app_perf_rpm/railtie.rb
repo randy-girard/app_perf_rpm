@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module AppPerfRpm
   class Railtie < ::Rails::Railtie
     initializer "app_perf.initialize" do |app|

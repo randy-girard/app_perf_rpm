@@ -1,6 +1,8 @@
-require 'msgpack'
+# frozen_string_literal: true
 
 module AppPerfRpm
+  require "opentracing"
+
   require 'app_perf_rpm/logger'
   require 'app_perf_rpm/configuration'
   require 'app_perf_rpm/backtrace'

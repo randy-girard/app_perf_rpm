@@ -20,26 +20,26 @@ describe AppPerfRpm::Utils do
       {
         "file"=>"[APP_PATH]/lib/app_perf_rpm/backtrace.rb",
         "code"=>{
-          46=>"\n",
-          47=>"      def source_extract(opts = {})\n",
-          48=>"        backtrace = opts[:backtrace] || Kernel.caller(0)\n",
-          49=>"\n",
-          50=>"        Array(backtrace).select {|bt| bt[/^\#{::AppPerfRpm.config.app_root.to_s}\\//] }.map do |trace|\n",
-          51=>"          file, line_number = extract_file_and_line_number(trace)\n"
+          48=>"\n",
+          49=>"      def source_extract(opts = {})\n",
+          50=>"        backtrace = opts[:backtrace] || Kernel.caller(0)\n",
+          51=>"\n",
+          52=>"        Array(backtrace).select {|bt| bt[/^\#{::AppPerfRpm.config.app_root.to_s}\\//] }.map do |trace|\n",
+          53=>"          file, line_number = extract_file_and_line_number(trace)\n"
         },
-        "line_number"=>48
+        "line_number"=>50
       },
       {
         "file"=>"[APP_PATH]/lib/app_perf_rpm/utils.rb",
         "code"=>{
-          34=>"      end\n",
-          35=>"      if config[:source]\n",
-          36=>"        source = AppPerfRpm::Backtrace.source_extract\n",
-          37=>"        if source.length > 0\n",
-          38=>"          span.log(event: \"source\", stack: source)\n",
-          39=>"        end\n"
+          36=>"      end\n",
+          37=>"      if config[:source]\n",
+          38=>"        source = AppPerfRpm::Backtrace.source_extract\n",
+          39=>"        if source.length > 0\n",
+          40=>"          span.log(event: \"source\", stack: source)\n",
+          41=>"        end\n"
         },
-        "line_number"=>36
+        "line_number"=>38
       }
     ])
   end

@@ -1,8 +1,9 @@
 PATH
   remote: .
   specs:
-    app_perf_rpm (0.2.2)
+    app_perf_rpm (0.2.3)
       msgpack
+      opentracing (= 0.3.1)
 
 GEM
   remote: https://rubygems.org/
@@ -45,9 +46,10 @@ GEM
     method_source (0.8.2)
     mini_portile2 (2.3.0)
     minitest (5.11.1)
-    msgpack (1.2.2)
+    msgpack (1.2.4)
     nokogiri (1.8.1)
       mini_portile2 (~> 2.3.0)
+    opentracing (0.3.1)
     pry (0.10.4)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)

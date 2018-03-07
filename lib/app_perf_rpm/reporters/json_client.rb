@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'net/http'
 require 'uri'
-require 'json'
+require 'msgpack'
 require 'base64'
 
 module AppPerfRpm

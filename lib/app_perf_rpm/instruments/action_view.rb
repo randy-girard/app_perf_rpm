@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::ActionView)
   if defined?(Rails) && Rails::VERSION::MAJOR == 2
     ActionView::Partials.module_eval do

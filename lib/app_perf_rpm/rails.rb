@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 if defined?(::Rails)
   if ::Rails::VERSION::MAJOR > 2
     require 'app_perf_rpm/railtie'

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 if ::AppPerfRpm.config.instrumentation[:net_http][:enabled] && defined?(Net::HTTP)
   ::AppPerfRpm.logger.info "Initializing net-http tracer."
 

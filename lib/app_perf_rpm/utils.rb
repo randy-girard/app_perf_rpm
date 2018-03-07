@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module AppPerfRpm
   module Utils
     REGEXP ||= Regexp.new('(\'[\s\S][^\']*\'|\d*\.\d+|\d+|NULL)')

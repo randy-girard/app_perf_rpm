@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] &&
   defined?(::ActiveModel) &&
   defined?(::ActiveModel::Serializer) &&

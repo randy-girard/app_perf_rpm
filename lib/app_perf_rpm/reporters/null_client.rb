@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module AppPerfRpm
   module Reporters
     class NullClient

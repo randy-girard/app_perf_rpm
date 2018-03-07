@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module AppPerf
   module Instruments
     module Roda
