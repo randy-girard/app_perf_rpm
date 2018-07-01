@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module AppPerf
+module AppPerfRpm
   module Instruments
     module Redis
       include AppPerfRpm::Utils
@@ -64,7 +64,7 @@ if ::AppPerfRpm.config.instrumentation[:redis][:enabled] &&
   defined?(::Redis)
   ::AppPerfRpm.logger.info "Initializing redis tracer."
 
-  ::Redis::Client.send(:include, ::AppPerf::Instruments::Redis)
+  ::Redis::Client.send(:include, ::AppPerfRpm::Instruments::Redis)
 
   ::Redis::Client.class_eval do
     alias_method :call_without_trace, :call

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module AppPerf
+module AppPerfRpm
   module Instruments
     module Roda
       def call_with_trace(&block)
@@ -40,7 +40,7 @@ end
 if defined?(::Roda) && ::AppPerfRpm.config.instrumentation[:roda][:enabled]
   ::AppPerfRpm.logger.info "Initializing roda tracer."
 
-  ::Roda::RodaPlugins::Base::InstanceMethods.send(:include, AppPerf::Instruments::Roda)
+  ::Roda::RodaPlugins::Base::InstanceMethods.send(:include, AppPerfRpm::Instruments::Roda)
   ::Roda::RodaPlugins::Base::InstanceMethods.class_eval do
     alias_method :call_without_trace, :call
     alias_method :call, :call_with_trace
