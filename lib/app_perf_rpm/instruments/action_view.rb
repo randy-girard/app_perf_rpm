@@ -186,14 +186,16 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
 
       def render_template(template, layout_name = nil, locals = {})
         if ::AppPerfRpm::Tracer.tracing?
-          layout = if layout_name.is_a?(String)
-                     layout_name
-                   elsif layout_name.is_a?(Proc)
-                     layout_name.call
-                   elsif method(:find_layout).arity == 3
-                     find_layout(layout_name, locals, [formats.first])
-                   elsif locals
-                     find_layout(layout_name, locals)
+	  layout = if layout_name
+                     if layout_name.is_a?(String)
+                       layout_name
+                     elsif layout_name.is_a?(Proc)
+                       layout_name.call
+                     elsif method(:find_layout).arity == 3
+                       find_layout(layout_name, locals, [formats.first])
+                     elsif locals
+                       find_layout(layout_name, locals)
+                     end
                    end
           span = AppPerfRpm.tracer.start_span("render_template")
           span.set_tag "view.layout", layout ? layout.inspect : ""
