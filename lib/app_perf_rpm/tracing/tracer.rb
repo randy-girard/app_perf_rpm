@@ -3,28 +3,38 @@
 module AppPerfRpm
   module Tracing
     class Tracer
-      attr_reader :thread_span_stack, :collector
+      attr_reader :thread_span_stack,
+                  :collector,
+                  :aggregator,
+                  :operation
 
       def self.build(opts = {})
         opts[:collector] ||= nil
+        opts[:aggregator] ||= nil
         opts[:sender] ||= nil
         opts[:service_name] ||= nil
 
         opts[:sender].start
 
-        new(opts[:collector], opts[:sender])
+        new(opts[:collector], opts[:aggregator], opts[:sender])
       end
 
-      def initialize(collector, sender)
+      def initialize(collector, aggregator, sender)
         @collector = collector
+        @aggregator = aggregator
         @sender = sender
+        @last_span_time = 0
       end
 
       def stop
         @sender.stop
       end
 
-      def start_span(operation_name, opts = {}, *)
+      def set_operation(operation)
+        @operation = operation
+      end
+
+      def start_span(opts = {}, *)
         child_of = opts[:child_of] || nil
         opts[:start_time] ||= AppPerfRpm.now
         opts[:tags] ||= {}
@@ -37,26 +47,28 @@ module AppPerfRpm
             SpanContext.create_parent_context
           end
 
-        span = Span.new(context, operation_name, @collector, {
+        span = Span.new(context, @operation, @collector, {
           start_time: opts[:start_time],
           tags: opts[:tags]
         })
       end
 
       def inject(span_context, format, carrier)
-        case format
-        when OpenTracing::FORMAT_TEXT_MAP
-          carrier['trace-id'] = span_context.trace_id
-          carrier['parent-id'] = span_context.parent_id
-          carrier['span-id'] = span_context.span_id
-          carrier['sampled'] = span_context.sampled? ? '1' : '0'
-        when OpenTracing::FORMAT_RACK
-          carrier['X-AppPerf-TraceId'] = span_context.trace_id
-          carrier['X-AppPerf-ParentSpanId'] = span_context.parent_id
-          carrier['X-AppPerf-SpanId'] = span_context.span_id
-          carrier['X-AppPerf-Sampled'] = span_context.sampled? ? '1' : '0'
-        else
-          STDERR.puts "AppPerfRpm::Tracer with format #{format} is not supported yet"
+        if span_context
+          case format
+          when OpenTracing::FORMAT_TEXT_MAP
+            carrier['trace-id'] = span_context.trace_id
+            carrier['parent-id'] = span_context.parent_id
+            carrier['span-id'] = span_context.span_id
+            carrier['sampled'] = span_context.sampled? ? '1' : '0'
+          when OpenTracing::FORMAT_RACK
+            carrier['X-AppPerf-TraceId'] = span_context.trace_id
+            carrier['X-AppPerf-ParentSpanId'] = span_context.parent_id
+            carrier['X-AppPerf-SpanId'] = span_context.span_id
+            carrier['X-AppPerf-Sampled'] = span_context.sampled? ? '1' : '0'
+          else
+            STDERR.puts "AppPerfRpm::Tracer with format #{format} is not supported yet"
+          end
         end
       end
 

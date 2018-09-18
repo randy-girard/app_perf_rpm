@@ -17,8 +17,8 @@ module AppPerfRpm
         #    status, headers, body = @app.call env
         #  end
         #else
-        span = AppPerfRpm.tracer.start_span("rack")
-        span.set_tag "type", "web"
+        span = AppPerfRpm.tracer.start_span("app.web.requests")
+        span.set_tag "component", "Rack"
         span.set_tag "domain", req.host
         span.set_tag "url", req.path
         span.set_tag "class", @app.class.name
@@ -63,24 +63,23 @@ if ::AppPerfRpm.config.instrumentation[:rack][:enabled]
           unless ignore_path?(req.path)
             extracted_ctx = AppPerfRpm.tracer.extract(OpenTracing::FORMAT_RACK, env)
             AppPerfRpm::Tracer.sample!(extracted_ctx, !!req.params["app-perf-sample"])
+            AppPerfRpm.tracer.set_operation("app.web.requests")
 
-            if AppPerfRpm::Tracer.tracing?
-              span = AppPerfRpm.tracer.start_span(@app.class.name, :child_of => extracted_ctx, tags: {
-                "component" => "Rack",
-                "span.kind" => "client"
-              })
-              AppPerfRpm::Utils.log_source_and_backtrace(span, :rack)
-            end
+            span = AppPerfRpm.tracer.start_span(:child_of => extracted_ctx, tags: {
+              "middleware" => @app.class.name,
+              "component" => "Rack"
+            })
+            span.log_source_and_backtrace(:rack)
           end
 
           status, headers, response = @app.call(env)
 
           if span
-            span.set_tag "peer.address", req.host
-            span.set_tag "peer.port", req.port
-            span.set_tag "http.method", req.request_method
-            span.set_tag "http.url", req.path
-            span.set_tag "http.status_code", status
+            span.set_tag "address", req.host
+            span.set_tag "port", req.port
+            span.set_tag "method", req.request_method
+            span.set_tag "url", req.path
+            span.set_tag "status_code", status
           end
 
           [status, headers, response]

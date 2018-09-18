@@ -5,13 +5,12 @@ module AppPerfRpm
     module Sinatra
       module Base
         def dispatch_with_trace
-          if ::AppPerfRpm::Tracer.tracing?
-            operation = "#{self.class}##{env["PATH_INFO"]}"
-            span = ::AppPerfRpm.tracer.start_span(operation, tags: {
-              component: "Sinatra"
-            })
-            AppPerfRpm::Utils.log_source_and_backtrace(span, :sinatra)
-          end
+          span = ::AppPerfRpm.tracer.start_span(tags: {
+            "component" => "Sinatra",
+            "controller" => self.class.to_s,
+            "action" => env["PATH_INFO"]
+          })
+          span.log_source_and_backtrace(:sinatra)
 
           dispatch_without_trace
         rescue Exception => e
@@ -31,18 +30,14 @@ module AppPerfRpm
 
       module Templates
         def render_with_trace(engine, data, options = {}, locals = {}, &block)
-          if ::AppPerfRpm::Tracer.tracing?
-            name = data
-
-            span = ::AppPerfRpm.tracer.start_span("render", tags: {
-              "component" => "Sinatra",
-              "view.engine" => engine,
-              "view.name" => name,
-              "view.line_number" => __LINE__,
-              "view.template" => __FILE__
-            })
-            AppPerfRpm::Utils.log_source_and_backtrace(span, :sinatra)
-          end
+          span = ::AppPerfRpm.tracer.start_span(tags: {
+            "component" => "Sinatra",
+            "engine" => engine,
+            "name" => data,
+            "line_number" => __LINE__,
+            "template" => __FILE__
+          })
+          span.log_source_and_backtrace(:sinatra)
 
           render_without_trace(engine, data, options, locals, &block)
         rescue Exception => e

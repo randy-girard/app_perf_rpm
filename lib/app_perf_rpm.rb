@@ -3,7 +3,7 @@
 module AppPerfRpm
   require "opentracing"
   require 'msgpack'
-  
+
   require 'app_perf_rpm/logger'
   require 'app_perf_rpm/configuration'
   require 'app_perf_rpm/backtrace'
@@ -12,6 +12,7 @@ module AppPerfRpm
   require 'app_perf_rpm/reporters/null_client'
 
   require 'app_perf_rpm/tracing/buffer'
+  require 'app_perf_rpm/tracing/metric_buffer'
   require 'app_perf_rpm/tracing/carrier'
   require 'app_perf_rpm/tracing/collector'
   require 'app_perf_rpm/tracing/endpoint'
@@ -23,6 +24,11 @@ module AppPerfRpm
   require 'app_perf_rpm/tracing/managed_tracer'
   require 'app_perf_rpm/tracing/thread_span_stack'
 
+  require 'app_perf_rpm/aggregate/buffer'
+  require 'app_perf_rpm/aggregate/collector'
+  require 'app_perf_rpm/aggregate/hdr_histogram'
+
+  require 'app_perf_rpm/aggregator'
   require 'app_perf_rpm/tracer'
   require 'app_perf_rpm/utils'
   require 'app_perf_rpm/instrumentation'
@@ -63,14 +69,19 @@ module AppPerfRpm
       @collector ||= AppPerfRpm::Tracing::Collector.new(endpoint)
     end
 
+    def aggregator
+      @aggregator ||= AppPerfRpm::Aggregate::Collector.new
+    end
+
     def url
-      @url ||= "#{config.host}/api/listener/3/#{config.license_key}"
+      @url ||= "#{config.host}/api/listener/#{config.license_key}"
     end
 
     def sender
       @sender ||= AppPerfRpm::Reporters::JsonClient.new(
         url: url,
         collector: collector,
+        :aggregator => aggregator,
         flush_interval: config.flush_interval
       )
     end
@@ -80,7 +91,8 @@ module AppPerfRpm
         AppPerfRpm::Tracing::Tracer.build(
           :service_name => config.application_name,
           :sender => sender,
-          :collector => collector
+          :collector => collector,
+          :aggregator => aggregator
         ),
         AppPerfRpm::Tracing::ThreadSpanStack.new
       )

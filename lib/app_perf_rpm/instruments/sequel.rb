@@ -23,13 +23,13 @@ module AppPerfRpm
         end
 
         {
-          "db.type" => opts[:type],
-          "db.statement" => sanitize_sql(sql),
-          "db.instance" => db_opts[:database],
-          "db.user" => db_opts[:user],
-          "db.vendor" => db_opts[:adapter],
-          "peer.address" => db_opts[:host],
-          "peer.port" => db_opts[:port]
+          "type" => opts[:type],
+          "statement" => sanitize_sql(sql),
+          "instance" => db_opts[:database],
+          "user" => db_opts[:user],
+          "vendor" => db_opts[:adapter],
+          "address" => db_opts[:host],
+          "port" => db_opts[:port]
         }
       end
     end
@@ -38,12 +38,9 @@ module AppPerfRpm
       include ::AppPerfRpm::Instruments::Sequel
 
       def run_with_trace(sql, options = ::Sequel::OPTS)
-        if ::AppPerfRpm::Tracer.tracing?
-          span = ::AppPerfRpm.tracer.start_span("sequel", tags: parse_opts(sql, options))
-          span.set_tag "component", "Sequel"
-          span.set_tag "span.kind", "client"
-          AppPerfRpm::Utils.log_source_and_backtrace(span, :sequel)
-        end
+        span = ::AppPerfRpm.tracer.start_span(tags: parse_opts(sql, options))
+        span.set_tag "component", "Sequel"
+        span.log_source_and_backtrace(:sequel)
 
         run_without_trace(sql, options)
       rescue Exception => e
@@ -61,12 +58,9 @@ module AppPerfRpm
       include ::AppPerfRpm::Instruments::Sequel
 
       def execute_with_trace(sql, options = ::Sequel::OPTS, &block)
-        if ::AppPerfRpm::Tracer.tracing?
-          span = ::AppPerfRpm.tracer.start_span("sequel", tags: parse_opts(sql, options))
-          span.set_tag "component", "Sequel"
-          span.set_tag "span.kind", "client"
-          AppPerfRpm::Utils.log_source_and_backtrace(span, :sequel)
-        end
+        span = ::AppPerfRpm.tracer.start_span(tags: parse_opts(sql, options))
+        span.set_tag "component", "Sequel"
+        span.log_source_and_backtrace(:sequel)
 
         execute_without_trace(sql, options, &block)
       rescue Exception => e

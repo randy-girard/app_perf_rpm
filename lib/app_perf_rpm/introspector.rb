@@ -16,7 +16,7 @@ module AppPerfRpm
     class << self
 
       def agentable?
-        if raking? || rspecing?
+        if raking? || rspecing? || console? || spring?
           AppPerfRpm.logger.info("Detected rake, not initializing agent")
           return false
         end
@@ -37,6 +37,14 @@ module AppPerfRpm
 
       def raking?
         (File.basename($0) =~ /\Arake/) == 0
+      end
+
+      def console?
+        (File.basename($0) =~ /\Arails_console/) == 0
+      end
+
+      def spring?
+        (File.basename($0) =~ /\Aspring/) == 0
       end
 
       def const_defined?(string_const)

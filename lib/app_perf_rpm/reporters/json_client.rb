@@ -7,8 +7,9 @@ require 'base64'
 module AppPerfRpm
   module Reporters
     class JsonClient
-      def initialize(opts = { :url => nil, :collector => nil, :flush_interval => nil })
+      def initialize(opts = { :url => nil, :collector => nil, :aggregator => nil, :flush_interval => nil })
         @collector = opts[:collector]
+        @aggregator = opts[:aggregator]
         @flush_interval = opts[:flush_interval]
         @spans_uri = URI.parse(opts[:url])
       end
@@ -33,15 +34,22 @@ module AppPerfRpm
         body = MessagePack.pack({
           "name" => AppPerfRpm.config.application_name,
           "host" => AppPerfRpm.host,
-          "data" => data
+          "spans" => data["spans"],
+          "metrics" => data["metrics"],
+          "tags" => data["tags"]
         })
 
-        compressed_body = Zlib::Deflate.deflate(body, Zlib::DEFAULT_COMPRESSION)
-        Base64.encode64(compressed_body)
+        compressed_data = Zlib::Deflate.deflate(body, Zlib::DEFAULT_COMPRESSION)
+        Base64.encode64(compressed_data)
       end
 
-      def emit_batch(spans)
-        return if spans.empty?
+      def data_empty?(data)
+        data["metrics"].empty? &&
+          data["spans"].empty?
+      end
+
+      def emit_batch(data)
+        return if data_empty?(data)
 
         sock = Net::HTTP.new(@spans_uri.host, @spans_uri.port)
         sock.use_ssl = ::AppPerfRpm.config.ssl
@@ -50,7 +58,7 @@ module AppPerfRpm
           "Accept-Encoding" => "gzip",
           "User-Agent" => "gzip"
         })
-        request.body = compress_body(spans)
+        request.body = compress_body(data)
         request.content_type = "application/octet-stream"
 
         response = sock.start do |http|

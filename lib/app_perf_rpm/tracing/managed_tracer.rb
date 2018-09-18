@@ -21,14 +21,22 @@ module AppPerfRpm
         @tracer.collector
       end
 
+      def aggregator
+        @tracer.aggregator
+      end
+
       def active_span
         thread_span_stack.active_span
       end
 
-      def start_span(operation_name, opts = {}, *args)
+      def set_operation(operation)
+        @tracer.set_operation(operation)
+      end
+
+      def start_span(opts = {}, *args)
         opts[:child_of] ||= active_span
 
-        span = @tracer.start_span(operation_name, opts, *args)
+        span = @tracer.start_span(opts, *args)
         @thread_span_stack.set_active_span(span)
       end
     end

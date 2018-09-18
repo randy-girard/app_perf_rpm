@@ -6,19 +6,16 @@ module AppPerf
       include AppPerfRpm::Utils
 
       def call_with_trace(*command, &block)
-        if ::AppPerfRpm::Tracer.tracing?
-          span = ::AppPerfRpm.tracer.start_span("redis", tags: {
-            "component" => "Redis",
-            "span.kind" => "client",
-            "peer.address" => self.host,
-            "peer.port" => self.port,
-            "db.type" => "redis",
-            "db.vendor" => "redis",
-            "db.instance" => self.db,
-            "db.statement" => format_redis_command(*command)
-          })
-          AppPerfRpm::Utils.log_source_and_backtrace(span, :redis)
-        end
+        span = ::AppPerfRpm.tracer.start_span(tags: {
+          "component" => "Redis",
+          "db.address" => self.host,
+          "db.port" => self.port,
+          "db.type" => "redis",
+          "db.vendor" => "redis",
+          "db.instance" => self.db,
+          "db.statement" => format_redis_command(*command)
+        })
+        span.log_source_and_backtrace(:redis)
 
         call_without_trace(*command, &block)
       rescue Exception => e
@@ -32,19 +29,16 @@ module AppPerf
       end
 
       def call_pipeline_with_trace(*pipeline)
-        if ::AppPerfRpm::Tracer.tracing?
-          span = ::AppPerfRpm.tracer.start_span("redis", tags: {
-            "component" => "Redis",
-            "span.kind" => "client",
-            "peer.address" => self.host,
-            "peer.port" => self.port,
-            "db.type" => "redis",
-            "db.vendor" => "redis",
-            "db.instance" => self.db,
-            "db.statement" => pipeline[0].commands.map { |c| format_redis_command(c) }.join("\n")
-          })
-          AppPerfRpm::Utils.log_source_and_backtrace(span, :redis)
-        end
+        span = ::AppPerfRpm.tracer.start_span(tags: {
+          "component" => "Redis",
+          "db.address" => self.host,
+          "db.port" => self.port,
+          "db.type" => "redis",
+          "db.vendor" => "redis",
+          "db.instance" => self.db,
+          "db.statement" => pipeline[0].commands.map { |c| format_redis_command(c) }.join("\n")
+        })
+        span.log_source_and_backtrace(:redis)
 
         call_pipeline_without_trace(*pipeline)
       rescue Exception => e

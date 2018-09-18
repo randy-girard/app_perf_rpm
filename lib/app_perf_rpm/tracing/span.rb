@@ -12,12 +12,19 @@ module AppPerfRpm
         @collector = collector
         @start_time = opts[:start_time] || AppPerfRpm.now
         @end_time = nil
-        @tags = opts[:tags] || {}
+        @tags = []
         @log_entries = []
+
+        add_tags(opts[:tags] || {})
+      end
+
+      def traceable?
+        true
       end
 
       def set_tag(key, value)
-        @tags = @tags.merge(key => value)
+        index = @collector.send_tag(key, value)
+        @tags << index
       end
 
       def add_tags(tags)
@@ -60,12 +67,22 @@ module AppPerfRpm
         )
       end
 
+      def log_source_and_backtrace(instrument)
+        AppPerfRpm::Utils.log_source_and_backtrace(self, instrument)
+      end
+
       def exit(opts = {})
         @end_time = opts[:end_time] || AppPerfRpm.now
       end
 
       def finish(opts = {})
-        @collector.send_span(self, @end_time || opts[:end_time] || AppPerfRpm.now)
+        end_time = @end_time || opts[:end_time] || AppPerfRpm.now
+        
+        @collector.send_metric(self, end_time)
+
+        if ::AppPerfRpm::Tracer.tracing?
+          @collector.send_span(self, end_time)
+        end
       end
     end
   end

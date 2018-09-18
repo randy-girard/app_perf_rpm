@@ -6,28 +6,25 @@ module AppPerfRpm
       include AppPerfRpm::Utils
 
       def insert_many_with_trace( sql, values, *args )
-        if ::AppPerfRpm::Tracer.tracing?
-          sql_copy = sql.dup
-          base_sql, post_sql = if sql_copy.dup.is_a?( String )
-            [sql_copy, '']
-          elsif sql.is_a?( Array )
-            [sql_copy.shift, sql_copy.join( ' ' )]
-          end
-
-          adapter = connection_config.fetch(:adapter)
-          sanitized_sql = sanitize_sql(base_sql + values.join( ',' ) + post_sql, adapter)
-
-          span = AppPerfRpm.tracer.start_span(self.class.name || 'sql.query', tags: {
-            "component" => "ActiveRecordImport",
-            "span.kind" => "client",
-            "db.statement" => sanitized_sql,
-            "db.user" => connection_config.fetch(:username, 'unknown'),
-            "db.instance" => connection_config.fetch(:database),
-            "db.vendor" => adapter,
-            "db.type" => "sql"
-          })
-          AppPerfRpm::Utils.log_source_and_backtrace(span, :active_record_import)
+        sql_copy = sql.dup
+        base_sql, post_sql = if sql_copy.dup.is_a?( String )
+          [sql_copy, '']
+        elsif sql.is_a?( Array )
+          [sql_copy.shift, sql_copy.join( ' ' )]
         end
+
+        adapter = connection_config.fetch(:adapter)
+        sanitized_sql = sanitize_sql(base_sql + values.join( ',' ) + post_sql, adapter)
+
+        span = AppPerfRpm.tracer.start_span(tags: {
+          "component" => "ActiveRecordImport",
+          "db.statement" => sanitized_sql,
+          "db.user" => connection_config.fetch(:username, 'unknown'),
+          "db.instance" => connection_config.fetch(:database),
+          "db.vendor" => adapter,
+          "db.type" => "sql"
+        })
+        span.log_source_and_backtrace(:active_record_import)
 
         insert_many_without_trace(sql, values, *args)
       rescue Exception => e

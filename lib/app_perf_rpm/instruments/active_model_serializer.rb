@@ -13,12 +13,10 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] &&
     klass.class_eval do
       alias :as_json_without_trace :as_json
       def as_json(*args)
-        if ::AppPerfRpm::Tracer.tracing?
-          span = AppPerfRpm.tracer.start_span("ActiveModel::Serializer", tags: {
-            "serializer" => self.class.to_s
-          })
-          AppPerfRpm::Utils.log_source_and_backtrace(span, :active_model_serializer)
-        end
+        span = AppPerfRpm.tracer.start_span(tags: {
+          "serializer" => self.class.to_s
+        })
+        span.log_source_and_backtrace(:active_model_serializer)
 
         as_json_without_trace(*args)
       rescue Exception => e

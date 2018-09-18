@@ -20,22 +20,19 @@ module AppPerfRpm
           end
 
           def execute_with_trace(sql, name = nil)
-            if ::AppPerfRpm::Tracer.tracing?
-              unless ignore_trace?(name)
-                adapter = connection_config.fetch(:adapter)
-                sanitized_sql = sanitize_sql(sql, adapter)
+            unless ignore_trace?(name)
+              adapter = connection_config.fetch(:adapter)
+              sanitized_sql = sanitize_sql(sql, adapter)
 
-                span = AppPerfRpm.tracer.start_span(name || 'SQL', tags: {
-                  "component" => "ActiveRecord",
-                  "span.kind" => "client",
-                  "db.statement" => sanitized_sql,
-                  "db.user" => connection_config.fetch(:username, 'unknown'),
-                  "db.instance" => connection_config.fetch(:database),
-                  "db.vendor" => adapter,
-                  "db.type" => "sql"
-                })
-                AppPerfRpm::Utils.log_source_and_backtrace(span, :active_record)
-              end
+              span = AppPerfRpm.tracer.start_span(tags: {
+                "component" => "ActiveRecord",
+                "db.statement" => sanitized_sql,
+                "db.user" => connection_config.fetch(:username, 'unknown'),
+                "db.instance" => connection_config.fetch(:database),
+                "db.vendor" => adapter,
+                "db.type" => "sql"
+              })
+              span.log_source_and_backtrace(:active_record)
             end
 
             execute_without_trace(sql, name)

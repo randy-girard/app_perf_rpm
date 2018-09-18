@@ -7,19 +7,16 @@ module AppPerfRpm
 
       parent_span_context = extract(msg)
       AppPerfRpm::Tracer.sample!(parent_span_context)
+      AppPerfRpm.tracer.set_operation("app.worker.requests")
 
-      if AppPerfRpm::Tracer.tracing?
-        operation = "Sidekiq_#{queue}##{msg["wrapped"]}"
-        span = AppPerfRpm.tracer.start_span(operation, :child_of => parent_span_context, tags: {
-          "component" => "Sidekiq",
-          "span.kind" => "server",
-          "http.url" => "/sidekiq/#{queue}/#{msg['wrapped']}",
-          "peer.address" => Socket.gethostname,
-          "bg.queue" => queue,
-          "bg.job_name" => worker.class.to_s
-        })
-        AppPerfRpm::Utils.log_source_and_backtrace(span, :sidekiq)
-      end
+      span = AppPerfRpm.tracer.start_span(:child_of => parent_span_context, tags: {
+        "component" => "SidekiqServer",
+        "queue" => queue,
+        "action" => msg["wrapped"],
+        "host" => Socket.gethostname,
+        "job_name" => worker.class.to_s
+      })
+      span.log_source_and_backtrace(:sidekiq)
 
       yield
     rescue Exception => e
@@ -46,20 +43,16 @@ module AppPerfRpm
     def call(*args)
       worker, msg, queue = args
 
-      if ::AppPerfRpm::Tracer.tracing?
-        operation = "Sidekiq_#{queue}##{msg["wrapped"]}"
-        span = AppPerfRpm.tracer.start_span(operation, tags: {
-          "component" => "Sidekiq",
-          "span.kind" => "client",
-          "http.url" => "/sidekiq/#{queue}/#{msg['wrapped']}",
-          "peer.address" => Socket.gethostname,
-          "bg.queue" => queue,
-          "bg.job_name" => worker.class.to_s
-        })
-        AppPerfRpm::Utils.log_source_and_backtrace(span, :sidekiq)
+      span = AppPerfRpm.tracer.start_span(tags: {
+        "component" => "SidekiqClient",
+        "queue" => queue,
+        "action" => msg['wrapped'],
+        "address" => Socket.gethostname,
+        "job_name" => worker.class.to_s
+      })
+      span.log_source_and_backtrace(:sidekiq)
 
-        inject(span, msg)
-      end
+      inject(span, msg)
 
       yield
     rescue Exception => e

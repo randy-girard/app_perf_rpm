@@ -20,22 +20,19 @@ module AppPerfRpm
           end
 
           def exec_query_with_trace(sql, name = nil, *args)
-            if ::AppPerfRpm::Tracer.tracing?
-              unless ignore_trace?(name)
-                adapter = connection_config.fetch(:adapter)
-                sanitized_sql = sanitize_sql(sql, adapter)
+            unless ignore_trace?(name)
+              adapter = connection_config.fetch(:adapter)
+              sanitized_sql = sanitize_sql(sql, adapter)
 
-                span = AppPerfRpm.tracer.start_span(name || 'SQL', tags: {
-                  "component" => "ActiveRecord",
-                  "span.kind" => "client",
-                  "db.statement" => sanitized_sql,
-                  "db.user" => connection_config.fetch(:username, 'unknown'),
-                  "db.instance" => connection_config.fetch(:database),
-                  "db.vendor" => adapter,
-                  "db.type" => "sql"
-                })
-                AppPerfRpm::Utils.log_source_and_backtrace(span, :active_record)
-              end
+              span = AppPerfRpm.tracer.start_span(tags: {
+                "component" => "ActiveRecord",
+                "db.statement" => sanitized_sql,
+                "db.user" => connection_config.fetch(:username, 'unknown'),
+                "db.instance" => connection_config.fetch(:database),
+                "db.vendor" => adapter,
+                "db.type" => "sql"
+              })
+              span.log_source_and_backtrace(:active_record)
             end
 
             exec_query_without_trace(sql, name, *args)
@@ -50,22 +47,19 @@ module AppPerfRpm
           end
 
           def exec_delete_with_trace(sql, name = nil, *args)
-            if ::AppPerfRpm::Tracer.tracing?
-              unless ignore_trace?(name)
-                adapter = connection_config.fetch(:adapter)
-                sanitized_sql = sanitize_sql(sql, adapter)
+            unless ignore_trace?(name)
+              adapter = connection_config.fetch(:adapter)
+              sanitized_sql = sanitize_sql(sql, adapter)
 
-                span = AppPerfRpm.tracer.start_span(name || 'SQL', tags: {
-                  "component" => "ActiveRecord",
-                  "span.kind" => "client",
-                  "db.statement" => sanitized_sql,
-                  "db.user" => connection_config.fetch(:username, 'unknown'),
-                  "db.instance" => connection_config.fetch(:database),
-                  "db.vendor" => adapter,
-                  "db.type" => "sql"
-                })
-                AppPerfRpm::Utils.log_source_and_backtrace(span, :active_record)
-              end
+              span = AppPerfRpm.tracer.start_span(tags: {
+                "component" => "ActiveRecord",
+                "db.statement" => sanitized_sql,
+                "db.user" => connection_config.fetch(:username, 'unknown'),
+                "db.instance" => connection_config.fetch(:database),
+                "db.vendor" => adapter,
+                "db.type" => "sql"
+              })
+              span.log_source_and_backtrace(:active_record)
             end
 
             exec_delete_without_trace(sql, name, *args)
@@ -80,22 +74,19 @@ module AppPerfRpm
           end
 
           def exec_insert_with_trace(sql, name = nil, *args)
-            if ::AppPerfRpm::Tracer.tracing?
-              unless ignore_trace?(name)
-                adapter = connection_config.fetch(:adapter)
-                sanitized_sql = sanitize_sql(sql, adapter)
+            unless ignore_trace?(name)
+              adapter = connection_config.fetch(:adapter)
+              sanitized_sql = sanitize_sql(sql, adapter)
 
-                span = AppPerfRpm.tracer.start_span(name || 'SQL', tags: {
-                  "component" => "ActiveRecord",
-                  "span.kind" => "client",
-                  "db.statement" => sanitized_sql,
-                  "db.user" => connection_config.fetch(:username, 'unknown'),
-                  "db.instance" => connection_config.fetch(:database),
-                  "db.vendor" => adapter,
-                  "db.type" => "sql"
-                })
-                AppPerfRpm::Utils.log_source_and_backtrace(span, :active_record)
-              end
+              span = AppPerfRpm.tracer.start_span(tags: {
+                "component" => "ActiveRecord",
+                "db.statement" => sanitized_sql,
+                "db.user" => connection_config.fetch(:username, 'unknown'),
+                "db.instance" => connection_config.fetch(:database),
+                "db.vendor" => adapter,
+                "db.type" => "sql"
+              })
+              span.log_source_and_backtrace(:active_record)
             end
 
             exec_insert_without_trace(sql, name, *args)
@@ -110,21 +101,18 @@ module AppPerfRpm
           end
 
           def begin_db_transaction_with_trace
-            if ::AppPerfRpm::Tracer.tracing?
-              adapter = connection_config.fetch(:adapter)
-              sanitized_sql = sanitize_sql(sql, adapter)
+            adapter = connection_config.fetch(:adapter)
+            sanitized_sql = sanitize_sql(sql, adapter)
 
-              span = AppPerfRpm.tracer.start_span('SQL', tags: {
-                "component" => "ActiveRecord",
-                "span.kind" => "client",
-                "db.statement" => "BEGIN",
-                "db.user" => connection_config.fetch(:username, 'unknown'),
-                "db.instance" => connection_config.fetch(:database),
-                "db.vendor" => adapter,
-                "db.type" => "sql"
-              })
-              AppPerfRpm::Utils.log_source_and_backtrace(span, :active_record)
-            end
+            span = AppPerfRpm.tracer.start_span(tags: {
+              "component" => "ActiveRecord",
+              "db.statement" => "BEGIN",
+              "db.user" => connection_config.fetch(:username, 'unknown'),
+              "db.instance" => connection_config.fetch(:database),
+              "db.vendor" => adapter,
+              "db.type" => "sql"
+            })
+            span.log_source_and_backtrace(:active_record)
 
             begin_db_transaction_without_trace
           rescue Exception => e

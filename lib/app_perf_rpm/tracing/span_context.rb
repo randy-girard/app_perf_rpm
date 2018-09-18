@@ -9,12 +9,16 @@ module AppPerfRpm
       end
 
       def self.create_from_parent_context(span_context)
-        new(
-          span_id: TraceId.generate,
-          parent_id: span_context.span_id,
-          trace_id: span_context.trace_id,
-          sampled: span_context.sampled?
-        )
+        if span_context
+          new(
+            span_id: TraceId.generate,
+            parent_id: span_context.span_id,
+            trace_id: span_context.trace_id,
+            sampled: span_context.sampled?
+          )
+        else
+          nil
+        end
       end
 
       attr_reader :span_id, :parent_id, :trace_id, :baggage

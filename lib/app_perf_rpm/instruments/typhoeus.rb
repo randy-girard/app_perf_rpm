@@ -4,23 +4,20 @@ module AppPerfRpm
   module Instruments
     module TyphoeusRequest
       def run_with_trace
-        if ::AppPerfRpm::Tracer.tracing?
-          span = ::AppPerfRpm.tracer.start_span("typhoeus", tags: {
-            "component" => "Typhoeus"
-          })
-          AppPerfRpm.tracer.inject(span.context, OpenTracing::FORMAT_RACK, options[:headers])
+        span = ::AppPerfRpm.tracer.start_span(tags: {
+          "component" => "Typhoeus"
+        })
+        AppPerfRpm.tracer.inject(span.context, OpenTracing::FORMAT_RACK, options[:headers])
 
-          response = run_without_trace
-          span.exit
-          uri = URI(response.effective_url)
+        response = run_without_trace
+        span.exit
+        uri = URI(response.effective_url)
 
-          span.set_tag "http.status_code", response.code
-          span.set_tag "http.url", uri.to_s
-          span.set_tag "http.method", options[:method]
-          AppPerfRpm::Utils.log_source_and_backtrace(span, :typhoeus)
-        else
-          response = run_without_trace
-        end
+        span.set_tag "status_code", response.code
+        span.set_tag "url", uri.to_s
+        span.set_tag "method", options[:method]
+        span.log_source_and_backtrace(:typhoeus)
+
         response
       rescue Exception => e
         if span
@@ -35,13 +32,13 @@ module AppPerfRpm
 
     module TyphoeusHydra
       def run_with_trace
-        span = ::AppPerfRpm.tracer.start_span("typhoeus", tags: {
+        span = ::AppPerfRpm.tracer.start_span("app.http.requests", tags: {
           "component" => "Typhoeus",
           "method" => "hydra",
-          "http.queued_requests" => queued_requests.count,
-          "http.max_concurrency" => max_concurrency
+          "queued_requests" => queued_requests.count,
+          "max_concurrency" => max_concurrency
         })
-        AppPerfRpm::Utils.log_source_and_backtrace(span, :typhoeus)
+        span.log_source_and_backtrace(:typhoeus)
 
         run_without_trace
       rescue Exception => e

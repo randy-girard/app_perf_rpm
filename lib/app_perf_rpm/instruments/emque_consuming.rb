@@ -7,12 +7,13 @@ module AppPerfRpm
         def route_with_trace(topic, type, message)
           action = type.to_s.split(".").last
 
-          span = ::AppPerfRpm.tracer.start_span("#{topic}##{action}", tags: {
+          span = ::AppPerfRpm.tracer.start_span("app.worker.requests", tags: {
             "component" => "EmqueConsuming",
-            "http.url" => "/#{topic}/#{action}",
+            "controller" => topic,
+            "action" => action,
             "peer.address" => Socket.gethostname
           })
-          AppPerfRpm::Utils.log_source_and_backtrace(span, :emque_consuming)
+          span.log_source_and_backtrace(:emque_consuming)
 
           route_without_trace(topic, type, message)
         rescue Exception => e

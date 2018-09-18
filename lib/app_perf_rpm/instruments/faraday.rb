@@ -4,25 +4,21 @@ module AppPerfRpm
   module Instruments
     module FaradayConnection
       def run_request_with_trace(method, url, body, headers, &block)
-        if ::AppPerfRpm::Tracer.tracing?
-          span = ::AppPerfRpm.tracer.start_span("faraday", tags: {
-            "component" => "Faraday",
-            "span.kind" => "client"
-          })
-          AppPerfRpm.tracer.inject(span.context, OpenTracing::FORMAT_RACK, @headers)
-          result = run_request_without_trace(method, url, body, headers, &block)
-          span.set_tag "middleware", @builder.handlers
-          span.set_tag "peer.hostname", @url_prefix.host
-          span.set_tag "peer.port", @url_prefix.port
-          span.set_tag "http.protocol", @url_prefix.scheme
-          span.set_tag "http.url", url
-          span.set_tag "http.method", method
-          span.set_tag "http.status_code", result.status
-          AppPerfRpm::Utils.log_source_and_backtrace(span, :faraday)
-          span.finish
-        else
-          result = run_request_without_trace(method, url, body, headers, &block)
-        end
+        span = ::AppPerfRpm.tracer.start_span(tags: {
+          "component" => "Faraday"
+        })
+        AppPerfRpm.tracer.inject(span.context, OpenTracing::FORMAT_RACK, @headers)
+        result = run_request_without_trace(method, url, body, headers, &block)
+        span.set_tag "middleware", @builder.handlers
+        span.set_tag "hostname", @url_prefix.host
+        span.set_tag "port", @url_prefix.port
+        span.set_tag "protocol", @url_prefix.scheme
+        span.set_tag "url", url
+        span.set_tag "method", method
+        span.set_tag "status_code", result.status
+        span.log_source_and_backtrace(:faraday)
+        span.finish
+
         result
       rescue Exception => e
         if span

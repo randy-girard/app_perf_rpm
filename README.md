@@ -40,6 +40,70 @@ Make sure the `wwtd` gem is installed and run:
 wwtd
 ```
 
+## Naming metrics.
+
+applications/frameworks/libraries
+
+??? - rack
+
+heirarchy
+
+first part
+
+app - application server
+system - physical servers or vms
+db - database servers running on machines
+http - web servers running
+
+second part
+
+primary metric we are record
+
+app.http (http requests within app)
+db.mysql (mysql server)
+http.nginx (nginx server)
+server.memory (memory on server)
+
+app.web.requests (rack, rails, sinatra, grape, etc))
+Framework - rails, sinatra, roda, grape, emque_consuming, padrino
+
+app.worker.requests (tag with sidekiq, delayed_job, etc)
+Background processors - sidekiq, delayed_job, resque
+
+app.db.requests (tag with component and driver)
+db frameworks - active_record, sequel, activerecord_import
+database drives - redis, memcache, mongo, pg, mysql, sqlite, etc
+
+app.http.requests (tag with component)
+http services - net_http, faraday, typhoeus
+
+app.view.requests (tag with component)
+view renderers - action_view
+
+servers (physical, vm, kube, docker tags)
+memory (system.memory.free, system.memory.used)
+cpu (system.cpu.idle, etc)
+diskspace (system.storage.free)
+
+databases (server type)
+db.mysql.??
+db.pg....
+database info ()
+
+web servers
+http.nginx.requests
+http.apache.requests
+
+metrics to record
+
+count (count)
+total (sum)
+avg
+histogram
+mean
+stddev
+percentiles?
+
 ## Supported versions
 
 Currently, AppPerf supports the following versions of frameworks and rubies:

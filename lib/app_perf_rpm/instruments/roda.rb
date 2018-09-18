@@ -4,24 +4,23 @@ module AppPerf
   module Instruments
     module Roda
       def call_with_trace(&block)
-        if AppPerfRpm::Tracer.tracing?
-          req = ::Rack::Request.new(env)
-          request_method = req.request_method.to_s.upcase
-          path = req.path
+        req = ::Rack::Request.new(env)
+        request_method = req.request_method.to_s.upcase
+        path = req.path
 
-          parts = path.to_s.rpartition("/")
-          action = parts.last
-          controller = parts.first.sub(/\A\//, '').split("/").collect {|w| w.capitalize }.join("::")
-          operation = "#{controller}##{action}"
+        parts = path.to_s.rpartition("/")
+        action = parts.last
+        controller = parts.first.sub(/\A\//, '').split("/").collect {|w| w.capitalize }.join("::")
 
-          span = AppPerfRpm.tracer.start_span(operation, tags: {
-            "component" => "Roda",
-            "http.url" => path,
-            "http.method" => request_method,
-            "params" => @_request.params
-          })
-          AppPerfRpm::Utils.log_source_and_backtrace(span, :roda)
-        end
+        span = AppPerfRpm.tracer.start_span(tags: {
+          "controller" => controller,
+          "action" => action,
+          "component" => "Roda",
+          "url" => path,
+          "method" => request_method,
+          "params" => @_request.params
+        })
+        span.log_source_and_backtrace(:roda)
 
         call_without_trace(&block)
       rescue Exception => e

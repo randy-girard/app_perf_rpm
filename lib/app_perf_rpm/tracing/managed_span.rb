@@ -5,7 +5,16 @@ module AppPerfRpm
     class ManagedSpan < Span
       extend Forwardable
 
-      def_delegators :@span, :context, :operation_name=, :set_tag, :set_baggage_item, :get_baggage_item, :log, :finish
+      def_delegators :@span,
+                     :context,
+                     :operation_name=,
+                     :set_tag,
+                     :set_baggage_item,
+                     :get_baggage_item,
+                     :log, :finish,
+                     :tracing?,
+                     :log_source_and_backtrace,
+                     :enable_histogram!
 
       def initialize(span, deactivate)
         @span = span

@@ -4,14 +4,12 @@ module AppPerfRpm
   module Instruments
     module ActionController
       def process_action_with_trace(method_name, *args)
-        if ::AppPerfRpm::Tracer.tracing?
-          operation = "#{self.class.name}##{self.action_name}"
-          span = AppPerfRpm.tracer.start_span(operation, tags: {
-            "component" => "ActionController",
-            "span.kind" => "client"
-          })
-          AppPerfRpm::Utils.log_source_and_backtrace(span, :action_controller)
-        end
+        span = AppPerfRpm.tracer.start_span(tags: {
+          "controller" => self.class.name,
+          "action" => self.action_name,
+          "component" => "ActionController"
+        })
+        span.log_source_and_backtrace(:action_controller)
 
         process_action_without_trace(method_name, *args)
       rescue Exception => e
@@ -27,14 +25,13 @@ module AppPerfRpm
       end
 
       def perform_action_with_trace(*arguments)
-        if ::AppPerfRpm::Tracer.tracing?
-          operation = "#{@_request.path_parameters['controller']}##{@_request.path_parameters['action']}"
-          span = AppPerfRpm.tracer.start_span(operation, tags: {
-            "component" => "ActionController",
-            "span.kind" => "client"
-          })
-          AppPerfRpm::Utils.log_source_and_backtrace(span, :action_controller)
-        end
+        span = AppPerfRpm.tracer.start_span(tags: {
+          "controller" => @_request.path_parameters['controller'],
+          "action" => @_request.path_parameters['action'],
+          "component" => "ActionController"
+        })
+        span.log_source_and_backtrace(:action_controller)
+
         perform_action_without_trace(*arguments)
       rescue Exception => e
         if span

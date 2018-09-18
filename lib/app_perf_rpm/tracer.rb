@@ -7,6 +7,10 @@ module AppPerfRpm
       # capable of starting the tracing process.
       # ie. rack, sidekiq worker, etc
       def sample!(incoming_trace = nil, force = false)
+        should_sample = should_sample?
+
+        return if !should_sample
+
         # Since we keep track of the active span, meaning we have entered into
         # tracing at some point, and we no longer have an active span,
         # reset tracing.
@@ -14,7 +18,7 @@ module AppPerfRpm
 
         # Now determine if we want to trace, either by an incoming
         # trace or meeting the sample rate.
-        Thread.current[:sample] = force || !!incoming_trace || should_sample?
+        Thread.current[:sample] = force || !!incoming_trace || should_sample
         Thread.current[:sample]
       end
 
@@ -35,7 +39,7 @@ module AppPerfRpm
       end
 
       def should_sample?
-        random_percentage <= ::AppPerfRpm.config.sample_rate.to_i
+        random_percentage < ::AppPerfRpm.config.sample_rate.to_i
       end
 
       def profile(layer, opts = {})

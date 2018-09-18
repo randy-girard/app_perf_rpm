@@ -27,6 +27,8 @@ module AppPerfRpm
     end
 
     def self.log_source_and_backtrace(span, instrument)
+      return if !span.traceable?
+
       config = ::AppPerfRpm.config.instrumentation[instrument] || {}
       if kind = config[:backtrace]
         backtrace = AppPerfRpm::Backtrace.backtrace(kind: kind)
