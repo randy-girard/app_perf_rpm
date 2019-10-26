@@ -107,7 +107,7 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
     ::ActionView::Rendering.class_eval do
       alias :_render_template_without_trace _render_template
 
-      def _render_template(template, layout = nil, options = {})
+      def _render_template(view, template, layout = nil, options = {})
         if ::AppPerfRpm::Tracer.tracing?
           span = AppPerfRpm.tracer.start_span("render_template")
           span.set_tag "view.template", template
@@ -117,7 +117,7 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
           AppPerfRpm::Utils.log_source_and_backtrace(span, :action_view)
         end
 
-        _render_template_without_trace(template, layout, options)
+        _render_template_without_trace(view, template, layout, options)
       rescue Exception => e
         if span
           span.set_tag('error', true)
@@ -133,7 +133,7 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
   if defined?(Rails) && Rails.version >= '3.1.0'
     ActionView::PartialRenderer.class_eval do
       alias :render_partial_without_trace :render_partial
-      def render_partial
+      def render_partial(context, template)
         if ::AppPerfRpm::Tracer.tracing?
           span = AppPerfRpm.tracer.start_span("render_partial", tags: {
             "component" => "ActionView",
@@ -143,7 +143,7 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
           AppPerfRpm::Utils.log_source_and_backtrace(span, :action_view)
         end
 
-        render_partial_without_trace
+        render_partial_without_trace(context, template)
       rescue Exception => e
         if span
           span.set_tag('error', true)
@@ -155,7 +155,7 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
       end
 
       alias :render_collection_without_trace :render_collection
-      def render_collection
+      def render_collection(context, template)
         if ::AppPerfRpm::Tracer.tracing?
           span = AppPerfRpm.tracer.start_span("render_collection", tags: {
             "component" => "ActionView",
@@ -169,7 +169,7 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
           AppPerfRpm::Utils.log_source_and_backtrace(span, :action_view)
         end
 
-        render_collection_without_trace
+        render_collection_without_trace(context, template)
       rescue Exception => e
         if span
           span.set_tag('error', true)
@@ -184,7 +184,7 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
     ::ActionView::TemplateRenderer.class_eval do
       alias :render_template_without_trace :render_template
 
-      def render_template(template, layout_name = nil, locals = {})
+      def render_template(view, template, layout_name = nil, locals = {})
         if ::AppPerfRpm::Tracer.tracing?
 	  layout = if layout_name
                      if layout_name.is_a?(String)
@@ -205,7 +205,7 @@ if ::AppPerfRpm.config.instrumentation[:action_view][:enabled] && defined?(::Act
           AppPerfRpm::Utils.log_source_and_backtrace(span, :action_view)
         end
 
-        render_template_without_trace(template, layout_name, locals)
+        render_template_without_trace(view, template, layout_name, locals)
       rescue Exception => e
         if span
           span.set_tag('error', true)
