@@ -1,4 +1,5 @@
 require 'support/apps/base_application'
+require 'support/test_response_fix'
 
 # Rails 4.0 and 4.1 fix.
 if Rails.version < "4.2"

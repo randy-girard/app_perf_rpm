@@ -83,5 +83,10 @@ def _sql(method, sql, check_obfuscator = true)
     sql = sql.gsub(" WHERE", "  WHERE")
   end
 
+  # And there is a weird error in Rails 6 adding a space
+  if (Rails.version >= "6.0.0" && method != :delete)
+    sql = sql.gsub(/^SELECT  /, "SELECT ")
+  end
+
   sql
 end

@@ -1,5 +1,4 @@
 require 'support/db_helper'
-require "rails/all"
 require 'rspec/rails'
 
 module AppPerfRpm
@@ -24,7 +23,7 @@ module AppPerfRpm
       end
 
       require 'support/apps/controllers'
-      initialize!
+      initialize! unless initialized?
       require 'support/apps/models'
     end
   end

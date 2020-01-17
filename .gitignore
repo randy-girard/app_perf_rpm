@@ -6,3 +6,4 @@
 /gemfiles/*.lock
 /*.sqlite3
 /log/*
+spec/support/apps/rails5/log/development.log
